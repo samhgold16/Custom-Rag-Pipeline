@@ -1,0 +1,5080 @@
+{
+  "dataset": "eval/quantummind.jsonl",
+  "environment": {
+    "timestamp": "2026-10-09T14:16:53-0400",
+    "git_sha": "c78555f",
+    "git_dirty": true,
+    "python": "3.13.5",
+    "platform": "macOS-26.6.2-arm64-arm-64bit-Mach-O",
+    "packages": {
+      "localrag": "0.2.0",
+      "langchain-core": "1.6.9",
+      "langchain-ollama": "1.1.0",
+      "langchain-qdrant": "1.1.0",
+      "qdrant-client": "1.19.1",
+      "rank-bm25": "0.2.2"
+    },
+    "ollama_version": "0.35.1",
+    "chat_model": "hf.co/openbmb/MiniCPM5-2B-GGUF:Q4_K_M",
+    "chat_model_digest": "50f17e0550ee",
+    "embedding_model": "nomic-embed-text",
+    "embedding_model_digest": "0a109f422b47",
+    "temperature": 0.0,
+    "chunk_size": 1000,
+    "chunk_overlap": 200,
+    "data_dir": "data/quantummind",
+    "dataset_sha256": "200b8740628a"
+  },
+  "seconds": 619.18,
+  "configs": [
+    {
+      "name": "baseline",
+      "description": "Original pipeline: raw chunks, plain context, dense k=4",
+      "header_fields": [],
+      "context_format": "plain",
+      "retrieval": "dense k=4",
+      "guardrail": false,
+      "rewrite": false
+    },
+    {
+      "name": "hdr-embedded",
+      "description": "Year header written into chunk text before embedding (the original fix)",
+      "header_fields": [
+        "year"
+      ],
+      "context_format": "plain",
+      "retrieval": "dense k=4",
+      "guardrail": false,
+      "rewrite": false
+    },
+    {
+      "name": "hdr-prompt",
+      "description": "Same header added at prompt time only; embeddings untouched",
+      "header_fields": [],
+      "context_format": "header",
+      "retrieval": "dense k=4",
+      "guardrail": false,
+      "rewrite": false
+    },
+    {
+      "name": "tagged",
+      "description": "[source | year] label at prompt time plus a citation instruction",
+      "header_fields": [],
+      "context_format": "tagged",
+      "retrieval": "dense k=4",
+      "guardrail": false,
+      "rewrite": false
+    },
+    {
+      "name": "mmr",
+      "description": "MMR (fetch_k=20, λ=0.5), header context",
+      "header_fields": [],
+      "context_format": "header",
+      "retrieval": "mmr k=4 λ=0.5",
+      "guardrail": false,
+      "rewrite": false
+    },
+    {
+      "name": "mmr-k2",
+      "description": "MMR with k=2 (hand-tuned on one question originally), header context",
+      "header_fields": [],
+      "context_format": "header",
+      "retrieval": "mmr k=2 λ=0.5",
+      "guardrail": false,
+      "rewrite": false
+    },
+    {
+      "name": "hybrid",
+      "description": "BM25 + dense, weighted RRF (0.5/0.5, c=60), header context",
+      "header_fields": [],
+      "context_format": "header",
+      "retrieval": "hybrid k=4 bm25=0.5",
+      "guardrail": false,
+      "rewrite": false
+    },
+    {
+      "name": "rerank",
+      "description": "Dense top-8 re-ranked by the LLM to top-4, header context",
+      "header_fields": [],
+      "context_format": "header",
+      "retrieval": "dense k=4 rerank@8",
+      "guardrail": false,
+      "rewrite": false
+    },
+    {
+      "name": "rewrite",
+      "description": "Two-step query rewrite (constraint-preserving), header context",
+      "header_fields": [],
+      "context_format": "header",
+      "retrieval": "dense k=4",
+      "guardrail": false,
+      "rewrite": true
+    },
+    {
+      "name": "guardrail",
+      "description": "Year-scope guardrail + auto payload filter, header context, dense",
+      "header_fields": [],
+      "context_format": "header",
+      "retrieval": "dense k=4",
+      "guardrail": true,
+      "rewrite": false
+    },
+    {
+      "name": "hybrid+guardrail",
+      "description": "Guardrail + hybrid retrieval, header context",
+      "header_fields": [],
+      "context_format": "header",
+      "retrieval": "hybrid k=4 bm25=0.5",
+      "guardrail": true,
+      "rewrite": false
+    }
+  ],
+  "summaries": [
+    {
+      "config": "baseline",
+      "n": 22,
+      "answerable": 18,
+      "unanswerable": 4,
+      "accuracy": 0.6363636363636364,
+      "answer_accuracy": 0.6111111111111112,
+      "abstention_accuracy": 0.75,
+      "hallucination_rate": 0.25,
+      "false_abstention_rate": 0.16666666666666666,
+      "hit_at_k": 0.8823529411764706,
+      "mrr": 0.6323529411764706,
+      "p50_seconds": 1.3820001664571464,
+      "p95_seconds": 3.4223211944045033,
+      "extra": {}
+    },
+    {
+      "config": "hdr-embedded",
+      "n": 22,
+      "answerable": 18,
+      "unanswerable": 4,
+      "accuracy": 0.7727272727272727,
+      "answer_accuracy": 0.7222222222222222,
+      "abstention_accuracy": 1.0,
+      "hallucination_rate": 0.0,
+      "false_abstention_rate": 0.05555555555555555,
+      "hit_at_k": 1.0,
+      "mrr": 0.8186274509803921,
+      "p50_seconds": 1.5656710210023448,
+      "p95_seconds": 2.4982713753299324,
+      "extra": {}
+    },
+    {
+      "config": "hdr-prompt",
+      "n": 22,
+      "answerable": 18,
+      "unanswerable": 4,
+      "accuracy": 0.8181818181818182,
+      "answer_accuracy": 0.7777777777777778,
+      "abstention_accuracy": 1.0,
+      "hallucination_rate": 0.0,
+      "false_abstention_rate": 0.05555555555555555,
+      "hit_at_k": 0.8823529411764706,
+      "mrr": 0.6323529411764706,
+      "p50_seconds": 1.356224374496378,
+      "p95_seconds": 2.369036093709292,
+      "extra": {}
+    },
+    {
+      "config": "tagged",
+      "n": 22,
+      "answerable": 18,
+      "unanswerable": 4,
+      "accuracy": 0.8181818181818182,
+      "answer_accuracy": 0.8333333333333334,
+      "abstention_accuracy": 0.75,
+      "hallucination_rate": 0.25,
+      "false_abstention_rate": 0.0,
+      "hit_at_k": 0.8823529411764706,
+      "mrr": 0.6323529411764706,
+      "p50_seconds": 2.7739876874838956,
+      "p95_seconds": 5.220360729465028,
+      "extra": {}
+    },
+    {
+      "config": "mmr",
+      "n": 22,
+      "answerable": 18,
+      "unanswerable": 4,
+      "accuracy": 0.7727272727272727,
+      "answer_accuracy": 0.7222222222222222,
+      "abstention_accuracy": 1.0,
+      "hallucination_rate": 0.0,
+      "false_abstention_rate": 0.16666666666666666,
+      "hit_at_k": 0.8235294117647058,
+      "mrr": 0.6225490196078431,
+      "p50_seconds": 3.3456566460081376,
+      "p95_seconds": 6.301359000074444,
+      "extra": {}
+    },
+    {
+      "config": "mmr-k2",
+      "n": 22,
+      "answerable": 18,
+      "unanswerable": 4,
+      "accuracy": 0.6363636363636364,
+      "answer_accuracy": 0.5555555555555556,
+      "abstention_accuracy": 1.0,
+      "hallucination_rate": 0.0,
+      "false_abstention_rate": 0.2777777777777778,
+      "hit_at_k": 0.7058823529411765,
+      "mrr": 0.5882352941176471,
+      "p50_seconds": 2.064765958522912,
+      "p95_seconds": 4.830576783308061,
+      "extra": {}
+    },
+    {
+      "config": "hybrid",
+      "n": 22,
+      "answerable": 18,
+      "unanswerable": 4,
+      "accuracy": 0.8636363636363636,
+      "answer_accuracy": 0.8333333333333334,
+      "abstention_accuracy": 1.0,
+      "hallucination_rate": 0.0,
+      "false_abstention_rate": 0.0,
+      "hit_at_k": 1.0,
+      "mrr": 0.8823529411764706,
+      "p50_seconds": 2.182078708021436,
+      "p95_seconds": 3.2018341172894,
+      "extra": {}
+    },
+    {
+      "config": "rerank",
+      "n": 22,
+      "answerable": 18,
+      "unanswerable": 4,
+      "accuracy": 0.8636363636363636,
+      "answer_accuracy": 0.8333333333333334,
+      "abstention_accuracy": 1.0,
+      "hallucination_rate": 0.0,
+      "false_abstention_rate": 0.16666666666666666,
+      "hit_at_k": 0.9411764705882353,
+      "mrr": 0.6813725490196079,
+      "p50_seconds": 6.438308792072348,
+      "p95_seconds": 8.510136691044318,
+      "extra": {}
+    },
+    {
+      "config": "rewrite",
+      "n": 22,
+      "answerable": 18,
+      "unanswerable": 4,
+      "accuracy": 0.8181818181818182,
+      "answer_accuracy": 0.7777777777777778,
+      "abstention_accuracy": 1.0,
+      "hallucination_rate": 0.0,
+      "false_abstention_rate": 0.05555555555555555,
+      "hit_at_k": 0.8823529411764706,
+      "mrr": 0.6617647058823529,
+      "p50_seconds": 2.414786625013221,
+      "p95_seconds": 4.527456175355473,
+      "extra": {}
+    },
+    {
+      "config": "guardrail",
+      "n": 22,
+      "answerable": 18,
+      "unanswerable": 4,
+      "accuracy": 0.8181818181818182,
+      "answer_accuracy": 0.7777777777777778,
+      "abstention_accuracy": 1.0,
+      "hallucination_rate": 0.0,
+      "false_abstention_rate": 0.05555555555555555,
+      "hit_at_k": 0.8823529411764706,
+      "mrr": 0.6617647058823529,
+      "p50_seconds": 1.6222157914889976,
+      "p95_seconds": 3.7773686917382294,
+      "extra": {}
+    },
+    {
+      "config": "hybrid+guardrail",
+      "n": 22,
+      "answerable": 18,
+      "unanswerable": 4,
+      "accuracy": 0.8636363636363636,
+      "answer_accuracy": 0.8333333333333334,
+      "abstention_accuracy": 1.0,
+      "hallucination_rate": 0.0,
+      "false_abstention_rate": 0.0,
+      "hit_at_k": 1.0,
+      "mrr": 0.9558823529411765,
+      "p50_seconds": 1.7797354580252431,
+      "p95_seconds": 2.5895255997544155,
+      "extra": {}
+    }
+  ],
+  "results": [
+    {
+      "config": "baseline",
+      "item_id": "q01",
+      "type": "factual",
+      "question": "How many qubits did QuantumMind's first quantum processor achieve?",
+      "answer": "QuantumMind's first quantum processor achieved 100 qubits.",
+      "abstained": false,
+      "correct": true,
+      "sources": [
+        "2030.txt",
+        "2031.txt",
+        "2035.txt",
+        "2030.txt"
+      ],
+      "hit": true,
+      "rr": 1.0,
+      "seconds": 1.8795941250864416,
+      "guardrail": null,
+      "rewritten_query": null
+    },
+    {
+      "config": "baseline",
+      "item_id": "q02",
+      "type": "factual",
+      "question": "What specific area of AI did QuantumMind make groundbreaking advancements in?",
+      "answer": "QuantumMind made groundbreaking advancements in quantum machine learning algorithms.",
+      "abstained": false,
+      "correct": true,
+      "sources": [
+        "2030.txt",
+        "2031.txt",
+        "2030.txt",
+        "2032.txt"
+      ],
+      "hit": true,
+      "rr": 1.0,
+      "seconds": 1.059708832995966,
+      "guardrail": null,
+      "rewritten_query": null
+    },
+    {
+      "config": "baseline",
+      "item_id": "q03",
+      "type": "factual",
+      "question": "What milestone did QuantumMind achieve in terms of quantum supremacy?",
+      "answer": "QuantumMind achieved quantum supremacy by successfully demonstrating quantum supremacy in a specific machine learning task, outperforming classical supercomputers.",
+      "abstained": false,
+      "correct": true,
+      "sources": [
+        "2031.txt",
+        "2030.txt",
+        "2030.txt",
+        "2035.txt"
+      ],
+      "hit": true,
+      "rr": 1.0,
+      "seconds": 1.6728924160124734,
+      "guardrail": null,
+      "rewritten_query": null
+    },
+    {
+      "config": "baseline",
+      "item_id": "q04",
+      "type": "factual",
+      "question": "What new service did QuantumMind launch for select partners?",
+      "answer": "QuantumMind launched its first commercial quantum cloud service, allowing select partners to experiment with their technology.",
+      "abstained": false,
+      "correct": true,
+      "sources": [
+        "2030.txt",
+        "2031.txt",
+        "2030.txt",
+        "2031.txt"
+      ],
+      "hit": true,
+      "rr": 0.5,
+      "seconds": 0.9486154590267688,
+      "guardrail": null,
+      "rewritten_query": null
+    },
+    {
+      "config": "baseline",
+      "item_id": "q05",
+      "type": "factual",
+      "question": "What specific challenge did QuantumMind face with their quantum systems?",
+      "answer": "QuantumMind faced ongoing struggles with error correction in their quantum systems, which limited the practical applications of their technology.",
+      "abstained": false,
+      "correct": true,
+      "sources": [
+        "2032.txt",
+        "2031.txt",
+        "2032.txt",
+        "2030.txt"
+      ],
+      "hit": true,
+      "rr": 1.0,
+      "seconds": 1.8040691249771044,
+      "guardrail": null,
+      "rewritten_query": null
+    },
+    {
+      "config": "baseline",
+      "item_id": "q06",
+      "type": "factual",
+      "question": "In what area did QuantumMind's AI team show promise despite overall setbacks?",
+      "answer": "Despite overall setbacks, QuantumMind's AI team showed promise in developing new classical algorithms inspired by quantum principles, which demonstrated potential in certain optimization problems.",
+      "abstained": false,
+      "correct": true,
+      "sources": [
+        "2030.txt",
+        "2031.txt",
+        "2032.txt",
+        "2032.txt"
+      ],
+      "hit": true,
+      "rr": 0.3333333333333333,
+      "seconds": 1.4135400829836726,
+      "guardrail": null,
+      "rewritten_query": null
+    },
+    {
+      "config": "baseline",
+      "item_id": "q07",
+      "type": "factual",
+      "question": "What drastic measure did QuantumMind take regarding its workforce?",
+      "answer": "QuantumMind rehired key personnel after securing emergency funding from a consortium of tech investors.",
+      "abstained": false,
+      "correct": false,
+      "sources": [
+        "2030.txt",
+        "2034.txt",
+        "2031.txt",
+        "2035.txt"
+      ],
+      "hit": false,
+      "rr": 0.0,
+      "seconds": 1.6338434169301763,
+      "guardrail": null,
+      "rewritten_query": null
+    },
+    {
+      "config": "baseline",
+      "item_id": "q08",
+      "type": "factual",
+      "question": "What alternative approach is QuantumMind exploring to generate near-term revenue?",
+      "answer": "QuantumMind is exploring the launch of its first commercial quantum cloud service to generate near-term revenue. This service allows select partners to experiment with their quantum technology, providing a way to monetize their capabilities while scaling their offerings.",
+      "abstained": false,
+      "correct": false,
+      "sources": [
+        "2032.txt",
+        "2031.txt",
+        "2030.txt",
+        "2031.txt"
+      ],
+      "hit": false,
+      "rr": 0.0,
+      "seconds": 1.664678958011791,
+      "guardrail": null,
+      "rewritten_query": null
+    },
+    {
+      "config": "baseline",
+      "item_id": "q09",
+      "type": "factual",
+      "question": "What led to the CEO's initial removal and subsequent reinstatement?",
+      "answer": "The CEO was initially removed due to the company's dire financial situation and lack of progress. His reinstatement came after recent extraordinary events that brought renewed hope and excitement for the company's future.",
+      "abstained": false,
+      "correct": false,
+      "sources": [
+        "2034.txt",
+        "2034.txt",
+        "2033.txt",
+        "2035.txt"
+      ],
+      "hit": true,
+      "rr": 1.0,
+      "seconds": 2.2748364579165354,
+      "guardrail": null,
+      "rewritten_query": null
+    },
+    {
+      "config": "baseline",
+      "item_id": "q10",
+      "type": "factual",
+      "question": "How many qubits did QuantumMind's new stable system achieve?",
+      "answer": "The new stable system achieved 1000 qubits.",
+      "abstained": false,
+      "correct": true,
+      "sources": [
+        "2031.txt",
+        "2030.txt",
+        "2035.txt",
+        "2034.txt"
+      ],
+      "hit": true,
+      "rr": 0.25,
+      "seconds": 1.1120796669274569,
+      "guardrail": null,
+      "rewritten_query": null
+    },
+    {
+      "config": "baseline",
+      "item_id": "q11",
+      "type": "factual",
+      "question": "To how many qubits did QuantumMind scale their quantum system?",
+      "answer": "QuantumMind scaled their quantum system to 10,000 qubits while maintaining unprecedented coherence times.",
+      "abstained": false,
+      "correct": true,
+      "sources": [
+        "2031.txt",
+        "2030.txt",
+        "2035.txt",
+        "2034.txt"
+      ],
+      "hit": true,
+      "rr": 0.3333333333333333,
+      "seconds": 0.5157054170267656,
+      "guardrail": null,
+      "rewritten_query": null
+    },
+    {
+      "config": "baseline",
+      "item_id": "q12",
+      "type": "factual",
+      "question": "In which specific industries did QuantumMind's quantum-AI hybrid systems show exponential speedups?",
+      "answer": "The quantum-AI hybrid systems showed exponential speedups in the drug discovery industry.",
+      "abstained": false,
+      "correct": true,
+      "sources": [
+        "2030.txt",
+        "2031.txt",
+        "2035.txt",
+        "2030.txt"
+      ],
+      "hit": true,
+      "rr": 0.3333333333333333,
+      "seconds": 0.9789064999204129,
+      "guardrail": null,
+      "rewritten_query": null
+    },
+    {
+      "config": "baseline",
+      "item_id": "p01",
+      "type": "factual",
+      "question": "Who is the CEO of QuantumMind?",
+      "answer": "The CEO of QuantumMind is Dr. Quentin Bohr.",
+      "abstained": false,
+      "correct": true,
+      "sources": [
+        "2031.txt",
+        "2030.txt",
+        "2033.txt",
+        "2035.txt"
+      ],
+      "hit": null,
+      "rr": null,
+      "seconds": 1.3184947499539703,
+      "guardrail": null,
+      "rewritten_query": null
+    },
+    {
+      "config": "baseline",
+      "item_id": "p02",
+      "type": "factual",
+      "question": "In which year did they build the 100 qubit quantum processor?",
+      "answer": "The context does not specify the year in which the 100-qubit quantum processor was built.",
+      "abstained": true,
+      "correct": false,
+      "sources": [
+        "2030.txt",
+        "2031.txt",
+        "2035.txt",
+        "2030.txt"
+      ],
+      "hit": true,
+      "rr": 1.0,
+      "seconds": 0.519467041012831,
+      "guardrail": null,
+      "rewritten_query": null
+    },
+    {
+      "config": "baseline",
+      "item_id": "p03",
+      "type": "factual",
+      "question": "When did Quantum mind's stock hit rock bottom?",
+      "answer": "The letter indicates that QuantumMind's stock price reached an all-time low during the period described in the CEO's first letter, which highlights the company's dire financial situation. However, the specific date is not provided in the context.",
+      "abstained": true,
+      "correct": false,
+      "sources": [
+        "2033.txt",
+        "2034.txt",
+        "2032.txt",
+        "2034.txt"
+      ],
+      "hit": true,
+      "rr": 1.0,
+      "seconds": 2.3500202919822186,
+      "guardrail": null,
+      "rewritten_query": null
+    },
+    {
+      "config": "baseline",
+      "item_id": "p04",
+      "type": "factual",
+      "question": "Did the company ever have a sense of frustration or aggression about the Quantum-AI space, in which year?",
+      "answer": "Yes, the company expressed feelings of frustration and aggression toward the Quantum-AI space. According to the context, these emotions were highlighted in the second shareholder letter, which was written in the year following the first letter. The second letter specifically mentions \"increased competition in the quantum-AI space, putting pressure on our market position\" as a source of frustration.",
+      "abstained": false,
+      "correct": false,
+      "sources": [
+        "2031.txt",
+        "2032.txt",
+        "2030.txt",
+        "2032.txt"
+      ],
+      "hit": true,
+      "rr": 0.5,
+      "seconds": 3.478758084005676,
+      "guardrail": null,
+      "rewritten_query": null
+    },
+    {
+      "config": "baseline",
+      "item_id": "p05",
+      "type": "summary",
+      "question": "What were the main points of the 2032 shareholder letter?",
+      "answer": "The 2032 shareholder letter covered both challenges and progress at QuantumMind. It acknowledged ongoing struggles with error correction, delays in the next-generation processor, increased competition, and a downsize due to financial pressure. It also highlighted a breakthrough in quantum error correction, rapid development of a stable 1000-qubit system, successful quantum advantage in financial modeling, and securing emergency funding. The letter concluded with renewed hope and excitement about the future, noting the CEO's reinstatement and the company's pivotal moment.",
+      "abstained": false,
+      "correct": true,
+      "sources": [
+        "2032.txt",
+        "2034.txt",
+        "2030.txt",
+        "2033.txt"
+      ],
+      "hit": true,
+      "rr": 1.0,
+      "seconds": 3.6530628750333562,
+      "guardrail": null,
+      "rewritten_query": null
+    },
+    {
+      "config": "baseline",
+      "item_id": "x03",
+      "type": "factual",
+      "question": "How many qubits did QuantumMind have in 2031?",
+      "answer": "I don't know. The provided context doesn't mention 2031.",
+      "abstained": true,
+      "correct": false,
+      "sources": [
+        "2030.txt",
+        "2031.txt",
+        "2035.txt",
+        "2030.txt"
+      ],
+      "hit": true,
+      "rr": 0.5,
+      "seconds": 0.6920569170033559,
+      "guardrail": null,
+      "rewritten_query": null
+    },
+    {
+      "config": "baseline",
+      "item_id": "u01",
+      "type": "unanswerable",
+      "question": "Was the CEO involved in a scandal?",
+      "answer": "I don't know. The provided context doesn't mention any CEO scandal.",
+      "abstained": true,
+      "correct": true,
+      "sources": [
+        "2034.txt",
+        "2033.txt",
+        "2032.txt",
+        "2033.txt"
+      ],
+      "hit": null,
+      "rr": null,
+      "seconds": 1.4166603329358622,
+      "guardrail": null,
+      "rewritten_query": null
+    },
+    {
+      "config": "baseline",
+      "item_id": "u02",
+      "type": "unanswerable",
+      "question": "what was the max qubits that Quantum mind reached in 2023?",
+      "answer": "In 2023, QuantumMind reached 10,000 qubits while maintaining unprecedented coherence times.",
+      "abstained": false,
+      "correct": false,
+      "sources": [
+        "2030.txt",
+        "2031.txt",
+        "2035.txt",
+        "2030.txt"
+      ],
+      "hit": null,
+      "rr": null,
+      "seconds": 0.5621912080096081,
+      "guardrail": null,
+      "rewritten_query": null
+    },
+    {
+      "config": "baseline",
+      "item_id": "x01",
+      "type": "unanswerable",
+      "question": "What was QuantumMind's revenue in 2036?",
+      "answer": "I don't know the answer.",
+      "abstained": true,
+      "correct": true,
+      "sources": [
+        "2031.txt",
+        "2030.txt",
+        "2030.txt",
+        "2034.txt"
+      ],
+      "hit": null,
+      "rr": null,
+      "seconds": 1.1063129170797765,
+      "guardrail": null,
+      "rewritten_query": null
+    },
+    {
+      "config": "baseline",
+      "item_id": "x02",
+      "type": "unanswerable",
+      "question": "Who was QuantumMind's CFO?",
+      "answer": "I don't know. The provided context doesn't mention the CFO of QuantumMind.",
+      "abstained": true,
+      "correct": true,
+      "sources": [
+        "2031.txt",
+        "2034.txt",
+        "2030.txt",
+        "2035.txt"
+      ],
+      "hit": null,
+      "rr": null,
+      "seconds": 1.3504602499306202,
+      "guardrail": null,
+      "rewritten_query": null
+    },
+    {
+      "config": "hdr-embedded",
+      "item_id": "q01",
+      "type": "factual",
+      "question": "How many qubits did QuantumMind's first quantum processor achieve?",
+      "answer": "According to the 2030 metadata, QuantumMind successfully developed their first 100-qubit quantum processor.",
+      "abstained": false,
+      "correct": true,
+      "sources": [
+        "2030.txt",
+        "2031.txt",
+        "2035.txt",
+        "2034.txt"
+      ],
+      "hit": true,
+      "rr": 1.0,
+      "seconds": 2.1696038339287043,
+      "guardrail": null,
+      "rewritten_query": null
+    },
+    {
+      "config": "hdr-embedded",
+      "item_id": "q02",
+      "type": "factual",
+      "question": "What specific area of AI did QuantumMind make groundbreaking advancements in?",
+      "answer": "According to the 2031 metadata, QuantumMind made groundbreaking advancements in quantum machine learning algorithms.",
+      "abstained": false,
+      "correct": true,
+      "sources": [
+        "2030.txt",
+        "2031.txt",
+        "2032.txt",
+        "2035.txt"
+      ],
+      "hit": true,
+      "rr": 1.0,
+      "seconds": 1.526023417012766,
+      "guardrail": null,
+      "rewritten_query": null
+    },
+    {
+      "config": "hdr-embedded",
+      "item_id": "q03",
+      "type": "factual",
+      "question": "What milestone did QuantumMind achieve in terms of quantum supremacy?",
+      "answer": "In the year 2031, QuantumMind achieved the successful demonstration of quantum supremacy in a specific machine learning task, outperforming classical supercomputers.",
+      "abstained": false,
+      "correct": true,
+      "sources": [
+        "2031.txt",
+        "2030.txt",
+        "2035.txt",
+        "2030.txt"
+      ],
+      "hit": true,
+      "rr": 1.0,
+      "seconds": 1.908331917016767,
+      "guardrail": null,
+      "rewritten_query": null
+    },
+    {
+      "config": "hdr-embedded",
+      "item_id": "q04",
+      "type": "factual",
+      "question": "What new service did QuantumMind launch for select partners?",
+      "answer": "I don't know the answer.",
+      "abstained": true,
+      "correct": false,
+      "sources": [
+        "2031.txt",
+        "2030.txt",
+        "2030.txt",
+        "2032.txt"
+      ],
+      "hit": true,
+      "rr": 1.0,
+      "seconds": 1.3019827499520034,
+      "guardrail": null,
+      "rewritten_query": null
+    },
+    {
+      "config": "hdr-embedded",
+      "item_id": "q05",
+      "type": "factual",
+      "question": "What specific challenge did QuantumMind face with their quantum systems?",
+      "answer": "According to the 2032 shareholder letter, QuantumMind faced ongoing struggles with error correction in their quantum systems, which limited the practical applications of their technology.",
+      "abstained": false,
+      "correct": true,
+      "sources": [
+        "2032.txt",
+        "2031.txt",
+        "2030.txt",
+        "2032.txt"
+      ],
+      "hit": true,
+      "rr": 1.0,
+      "seconds": 2.0954864589730278,
+      "guardrail": null,
+      "rewritten_query": null
+    },
+    {
+      "config": "hdr-embedded",
+      "item_id": "q06",
+      "type": "factual",
+      "question": "In what area did QuantumMind's AI team show promise despite overall setbacks?",
+      "answer": "Despite overall setbacks, QuantumMind's AI team showed promise in quantum machine learning algorithms, particularly in solving complex optimization problems.",
+      "abstained": false,
+      "correct": false,
+      "sources": [
+        "2032.txt",
+        "2030.txt",
+        "2032.txt",
+        "2031.txt"
+      ],
+      "hit": true,
+      "rr": 1.0,
+      "seconds": 1.564721000031568,
+      "guardrail": null,
+      "rewritten_query": null
+    },
+    {
+      "config": "hdr-embedded",
+      "item_id": "q07",
+      "type": "factual",
+      "question": "What drastic measure did QuantumMind take regarding its workforce?",
+      "answer": "QuantumMind rehired key personnel after securing emergency funding from a consortium of tech investors.",
+      "abstained": false,
+      "correct": false,
+      "sources": [
+        "2034.txt",
+        "2035.txt",
+        "2030.txt",
+        "2033.txt"
+      ],
+      "hit": true,
+      "rr": 0.25,
+      "seconds": 1.8486494579119608,
+      "guardrail": null,
+      "rewritten_query": null
+    },
+    {
+      "config": "hdr-embedded",
+      "item_id": "q08",
+      "type": "factual",
+      "question": "What alternative approach is QuantumMind exploring to generate near-term revenue?",
+      "answer": "According to the latest update, QuantumMind is refocusing its efforts on near-term applications of quantum-inspired algorithms to generate much-needed revenue. The company is also in talks with potential investors and exploring strategic partnerships to address its financial challenges.",
+      "abstained": false,
+      "correct": true,
+      "sources": [
+        "2032.txt",
+        "2031.txt",
+        "2033.txt",
+        "2030.txt"
+      ],
+      "hit": true,
+      "rr": 0.3333333333333333,
+      "seconds": 2.0012005829485133,
+      "guardrail": null,
+      "rewritten_query": null
+    },
+    {
+      "config": "hdr-embedded",
+      "item_id": "q09",
+      "type": "factual",
+      "question": "What led to the CEO's initial removal and subsequent reinstatement?",
+      "answer": "The CEO was initially removed due to the company's dire financial situation and lack of progress. He was reinstated after recent extraordinary events brought renewed hope and excitement for QuantumMind's future.",
+      "abstained": false,
+      "correct": false,
+      "sources": [
+        "2034.txt",
+        "2034.txt",
+        "2035.txt",
+        "2033.txt"
+      ],
+      "hit": true,
+      "rr": 1.0,
+      "seconds": 1.8543474579928443,
+      "guardrail": null,
+      "rewritten_query": null
+    },
+    {
+      "config": "hdr-embedded",
+      "item_id": "q10",
+      "type": "factual",
+      "question": "How many qubits did QuantumMind's new stable system achieve?",
+      "answer": "The context mentions that the breakthrough led to the rapid development of a stable 1000-qubit system.",
+      "abstained": false,
+      "correct": true,
+      "sources": [
+        "2034.txt",
+        "2031.txt",
+        "2035.txt",
+        "2030.txt"
+      ],
+      "hit": true,
+      "rr": 1.0,
+      "seconds": 1.5666210419731215,
+      "guardrail": null,
+      "rewritten_query": null
+    },
+    {
+      "config": "hdr-embedded",
+      "item_id": "q11",
+      "type": "factual",
+      "question": "To how many qubits did QuantumMind scale their quantum system?",
+      "answer": "According to the 2035 shareholder letter, QuantumMind scaled their quantum system to 10,000 qubits while maintaining unprecedented coherence times.",
+      "abstained": false,
+      "correct": true,
+      "sources": [
+        "2031.txt",
+        "2030.txt",
+        "2035.txt",
+        "2035.txt"
+      ],
+      "hit": true,
+      "rr": 0.3333333333333333,
+      "seconds": 1.1317581660114229,
+      "guardrail": null,
+      "rewritten_query": null
+    },
+    {
+      "config": "hdr-embedded",
+      "item_id": "q12",
+      "type": "factual",
+      "question": "In which specific industries did QuantumMind's quantum-AI hybrid systems show exponential speedups?",
+      "answer": "According to the provided context, QuantumMind's quantum-AI hybrid systems showed exponential speedups in the **drug discovery** industry.",
+      "abstained": false,
+      "correct": true,
+      "sources": [
+        "2030.txt",
+        "2035.txt",
+        "2031.txt",
+        "2032.txt"
+      ],
+      "hit": true,
+      "rr": 0.5,
+      "seconds": 1.8079993750434369,
+      "guardrail": null,
+      "rewritten_query": null
+    },
+    {
+      "config": "hdr-embedded",
+      "item_id": "p01",
+      "type": "factual",
+      "question": "Who is the CEO of QuantumMind?",
+      "answer": "The CEO of QuantumMind is Dr. Quentin Bohr.",
+      "abstained": false,
+      "correct": true,
+      "sources": [
+        "2031.txt",
+        "2033.txt",
+        "2035.txt",
+        "2030.txt"
+      ],
+      "hit": null,
+      "rr": null,
+      "seconds": 1.2761643329868093,
+      "guardrail": null,
+      "rewritten_query": null
+    },
+    {
+      "config": "hdr-embedded",
+      "item_id": "p02",
+      "type": "factual",
+      "question": "In which year did they build the 100 qubit quantum processor?",
+      "answer": "The 100-qubit quantum processor was built in 2030.",
+      "abstained": false,
+      "correct": true,
+      "sources": [
+        "2030.txt",
+        "2031.txt",
+        "2035.txt",
+        "2035.txt"
+      ],
+      "hit": true,
+      "rr": 1.0,
+      "seconds": 1.0701015420490876,
+      "guardrail": null,
+      "rewritten_query": null
+    },
+    {
+      "config": "hdr-embedded",
+      "item_id": "p03",
+      "type": "factual",
+      "question": "When did Quantum mind's stock hit rock bottom?",
+      "answer": "According to the 2033 shareholder letter, QuantumMind's stock hit an all-time low that year, reflecting the market's loss of confidence in the company's ability to deliver on quantum computing promises. The 2034 letter indicates the stock remained far below its peak but showed signs of recovery. The 2031 letter notes continued volatility but no specific date for the rock bottom.",
+      "abstained": false,
+      "correct": true,
+      "sources": [
+        "2033.txt",
+        "2034.txt",
+        "2031.txt",
+        "2034.txt"
+      ],
+      "hit": true,
+      "rr": 1.0,
+      "seconds": 3.150980875012465,
+      "guardrail": null,
+      "rewritten_query": null
+    },
+    {
+      "config": "hdr-embedded",
+      "item_id": "p04",
+      "type": "factual",
+      "question": "Did the company ever have a sense of frustration or aggression about the Quantum-AI space, in which year?",
+      "answer": "The company expressed frustration and aggression toward the Quantum-AI space in the year 2031, as indicated in the shareholder letter from that period.",
+      "abstained": false,
+      "correct": false,
+      "sources": [
+        "2032.txt",
+        "2032.txt",
+        "2031.txt",
+        "2033.txt"
+      ],
+      "hit": true,
+      "rr": 1.0,
+      "seconds": 1.8817240829812363,
+      "guardrail": null,
+      "rewritten_query": null
+    },
+    {
+      "config": "hdr-embedded",
+      "item_id": "p05",
+      "type": "summary",
+      "question": "What were the main points of the 2032 shareholder letter?",
+      "answer": "The 2032 shareholder letter highlighted ongoing struggles with error correction in quantum systems, delays in developing the next-generation quantum processor, and increased competition in the quantum-AI space. Despite these challenges, the letter noted some areas of progress.",
+      "abstained": false,
+      "correct": true,
+      "sources": [
+        "2032.txt",
+        "2033.txt",
+        "2034.txt",
+        "2030.txt"
+      ],
+      "hit": true,
+      "rr": 1.0,
+      "seconds": 2.5155696669826284,
+      "guardrail": null,
+      "rewritten_query": null
+    },
+    {
+      "config": "hdr-embedded",
+      "item_id": "x03",
+      "type": "factual",
+      "question": "How many qubits did QuantumMind have in 2031?",
+      "answer": "In 2031, QuantumMind had expanded its quantum hardware capabilities to reach 250 qubits.",
+      "abstained": false,
+      "correct": true,
+      "sources": [
+        "2030.txt",
+        "2031.txt",
+        "2035.txt",
+        "2035.txt"
+      ],
+      "hit": true,
+      "rr": 0.5,
+      "seconds": 0.9572585000423715,
+      "guardrail": null,
+      "rewritten_query": null
+    },
+    {
+      "config": "hdr-embedded",
+      "item_id": "u01",
+      "type": "unanswerable",
+      "question": "Was the CEO involved in a scandal?",
+      "answer": "I don't know. The provided context doesn't mention any CEO scandal.",
+      "abstained": true,
+      "correct": true,
+      "sources": [
+        "2034.txt",
+        "2033.txt",
+        "2033.txt",
+        "2035.txt"
+      ],
+      "hit": null,
+      "rr": null,
+      "seconds": 1.5241602499736473,
+      "guardrail": null,
+      "rewritten_query": null
+    },
+    {
+      "config": "hdr-embedded",
+      "item_id": "u02",
+      "type": "unanswerable",
+      "question": "what was the max qubits that Quantum mind reached in 2023?",
+      "answer": "I don't know the answer.",
+      "abstained": true,
+      "correct": true,
+      "sources": [
+        "2030.txt",
+        "2035.txt",
+        "2031.txt",
+        "2030.txt"
+      ],
+      "hit": null,
+      "rr": null,
+      "seconds": 0.5076138329459354,
+      "guardrail": null,
+      "rewritten_query": null
+    },
+    {
+      "config": "hdr-embedded",
+      "item_id": "x01",
+      "type": "unanswerable",
+      "question": "What was QuantumMind's revenue in 2036?",
+      "answer": "I don't know. The provided context does not include any information about QuantumMind's revenue in 2036.",
+      "abstained": true,
+      "correct": true,
+      "sources": [
+        "2031.txt",
+        "2030.txt",
+        "2030.txt",
+        "2035.txt"
+      ],
+      "hit": null,
+      "rr": null,
+      "seconds": 1.376810625079088,
+      "guardrail": null,
+      "rewritten_query": null
+    },
+    {
+      "config": "hdr-embedded",
+      "item_id": "x02",
+      "type": "unanswerable",
+      "question": "Who was QuantumMind's CFO?",
+      "answer": "I don't know. The provided context doesn't mention a CFO.",
+      "abstained": true,
+      "correct": true,
+      "sources": [
+        "2034.txt",
+        "2031.txt",
+        "2035.txt",
+        "2030.txt"
+      ],
+      "hit": null,
+      "rr": null,
+      "seconds": 1.1420525000430644,
+      "guardrail": null,
+      "rewritten_query": null
+    },
+    {
+      "config": "hdr-prompt",
+      "item_id": "q01",
+      "type": "factual",
+      "question": "How many qubits did QuantumMind's first quantum processor achieve?",
+      "answer": "According to the 2030 metadata, QuantumMind's first quantum processor achieved 100 qubits.",
+      "abstained": false,
+      "correct": true,
+      "sources": [
+        "2030.txt",
+        "2031.txt",
+        "2035.txt",
+        "2030.txt"
+      ],
+      "hit": true,
+      "rr": 1.0,
+      "seconds": 0.7103398329345509,
+      "guardrail": null,
+      "rewritten_query": null
+    },
+    {
+      "config": "hdr-prompt",
+      "item_id": "q02",
+      "type": "factual",
+      "question": "What specific area of AI did QuantumMind make groundbreaking advancements in?",
+      "answer": "According to the provided context, QuantumMind made groundbreaking advancements in quantum machine learning algorithms.",
+      "abstained": false,
+      "correct": true,
+      "sources": [
+        "2030.txt",
+        "2031.txt",
+        "2030.txt",
+        "2032.txt"
+      ],
+      "hit": true,
+      "rr": 1.0,
+      "seconds": 1.04800679103937,
+      "guardrail": null,
+      "rewritten_query": null
+    },
+    {
+      "config": "hdr-prompt",
+      "item_id": "q03",
+      "type": "factual",
+      "question": "What milestone did QuantumMind achieve in terms of quantum supremacy?",
+      "answer": "In the year 2031, QuantumMind reported the successful demonstration of quantum supremacy in a specific machine learning task, outperforming classical supercomputers.",
+      "abstained": false,
+      "correct": true,
+      "sources": [
+        "2031.txt",
+        "2030.txt",
+        "2030.txt",
+        "2035.txt"
+      ],
+      "hit": true,
+      "rr": 1.0,
+      "seconds": 1.5362911249976605,
+      "guardrail": null,
+      "rewritten_query": null
+    },
+    {
+      "config": "hdr-prompt",
+      "item_id": "q04",
+      "type": "factual",
+      "question": "What new service did QuantumMind launch for select partners?",
+      "answer": "In 2031, QuantumMind launched its first commercial quantum cloud service, allowing select partners to experiment with their technology.",
+      "abstained": false,
+      "correct": true,
+      "sources": [
+        "2030.txt",
+        "2031.txt",
+        "2030.txt",
+        "2031.txt"
+      ],
+      "hit": true,
+      "rr": 0.5,
+      "seconds": 1.1370001669274643,
+      "guardrail": null,
+      "rewritten_query": null
+    },
+    {
+      "config": "hdr-prompt",
+      "item_id": "q05",
+      "type": "factual",
+      "question": "What specific challenge did QuantumMind face with their quantum systems?",
+      "answer": "According to the 2032 shareholder letter, QuantumMind faced ongoing struggles with error correction in their quantum systems, which limited the practical applications of their technology.",
+      "abstained": false,
+      "correct": true,
+      "sources": [
+        "2032.txt",
+        "2031.txt",
+        "2032.txt",
+        "2030.txt"
+      ],
+      "hit": true,
+      "rr": 1.0,
+      "seconds": 1.593847083975561,
+      "guardrail": null,
+      "rewritten_query": null
+    },
+    {
+      "config": "hdr-prompt",
+      "item_id": "q06",
+      "type": "factual",
+      "question": "In what area did QuantumMind's AI team show promise despite overall setbacks?",
+      "answer": "Despite overall setbacks, QuantumMind's AI team showed promise in developing new classical algorithms inspired by quantum principles, which demonstrated potential in certain optimization problems.",
+      "abstained": false,
+      "correct": true,
+      "sources": [
+        "2030.txt",
+        "2031.txt",
+        "2032.txt",
+        "2032.txt"
+      ],
+      "hit": true,
+      "rr": 0.3333333333333333,
+      "seconds": 1.3797942079836503,
+      "guardrail": null,
+      "rewritten_query": null
+    },
+    {
+      "config": "hdr-prompt",
+      "item_id": "q07",
+      "type": "factual",
+      "question": "What drastic measure did QuantumMind take regarding its workforce?",
+      "answer": "Dr. Bohr was removed as CEO due to the company's dire financial situation, and he was reinstated after extraordinary events led to renewed hope. The company secured emergency funding from a consortium of tech investors to rehire key personnel and accelerate research.",
+      "abstained": false,
+      "correct": false,
+      "sources": [
+        "2030.txt",
+        "2034.txt",
+        "2031.txt",
+        "2035.txt"
+      ],
+      "hit": false,
+      "rr": 0.0,
+      "seconds": 2.239147249958478,
+      "guardrail": null,
+      "rewritten_query": null
+    },
+    {
+      "config": "hdr-prompt",
+      "item_id": "q08",
+      "type": "factual",
+      "question": "What alternative approach is QuantumMind exploring to generate near-term revenue?",
+      "answer": "Based on the provided context, QuantumMind is exploring the launch of its first commercial quantum cloud service as an alternative approach to generating near-term revenue. This service allows select partners to experiment with their quantum technology.",
+      "abstained": false,
+      "correct": false,
+      "sources": [
+        "2032.txt",
+        "2031.txt",
+        "2030.txt",
+        "2031.txt"
+      ],
+      "hit": false,
+      "rr": 0.0,
+      "seconds": 1.5656041669426486,
+      "guardrail": null,
+      "rewritten_query": null
+    },
+    {
+      "config": "hdr-prompt",
+      "item_id": "q09",
+      "type": "factual",
+      "question": "What led to the CEO's initial removal and subsequent reinstatement?",
+      "answer": "The CEO was initially removed due to the company's dire financial situation and lack of progress. He was reinstated after recent extraordinary events brought renewed hope and excitement for QuantumMind's future.",
+      "abstained": false,
+      "correct": false,
+      "sources": [
+        "2034.txt",
+        "2034.txt",
+        "2033.txt",
+        "2035.txt"
+      ],
+      "hit": true,
+      "rr": 1.0,
+      "seconds": 1.8179237080039456,
+      "guardrail": null,
+      "rewritten_query": null
+    },
+    {
+      "config": "hdr-prompt",
+      "item_id": "q10",
+      "type": "factual",
+      "question": "How many qubits did QuantumMind's new stable system achieve?",
+      "answer": "The new stable system achieved 1000 qubits.",
+      "abstained": false,
+      "correct": true,
+      "sources": [
+        "2031.txt",
+        "2030.txt",
+        "2035.txt",
+        "2034.txt"
+      ],
+      "hit": true,
+      "rr": 0.25,
+      "seconds": 1.1389322499744594,
+      "guardrail": null,
+      "rewritten_query": null
+    },
+    {
+      "config": "hdr-prompt",
+      "item_id": "q11",
+      "type": "factual",
+      "question": "To how many qubits did QuantumMind scale their quantum system?",
+      "answer": "According to the provided context, QuantumMind scaled their quantum system to 10,000 qubits in 2035.",
+      "abstained": false,
+      "correct": true,
+      "sources": [
+        "2031.txt",
+        "2030.txt",
+        "2035.txt",
+        "2034.txt"
+      ],
+      "hit": true,
+      "rr": 0.3333333333333333,
+      "seconds": 0.5881269590463489,
+      "guardrail": null,
+      "rewritten_query": null
+    },
+    {
+      "config": "hdr-prompt",
+      "item_id": "q12",
+      "type": "factual",
+      "question": "In which specific industries did QuantumMind's quantum-AI hybrid systems show exponential speedups?",
+      "answer": "According to the provided context, QuantumMind's quantum-AI hybrid systems showed exponential speedups in the **drug discovery** industry.",
+      "abstained": false,
+      "correct": true,
+      "sources": [
+        "2030.txt",
+        "2031.txt",
+        "2035.txt",
+        "2030.txt"
+      ],
+      "hit": true,
+      "rr": 0.3333333333333333,
+      "seconds": 1.1396434579510242,
+      "guardrail": null,
+      "rewritten_query": null
+    },
+    {
+      "config": "hdr-prompt",
+      "item_id": "p01",
+      "type": "factual",
+      "question": "Who is the CEO of QuantumMind?",
+      "answer": "The CEO of QuantumMind is Dr. Quentin Bohr.",
+      "abstained": false,
+      "correct": true,
+      "sources": [
+        "2031.txt",
+        "2030.txt",
+        "2033.txt",
+        "2035.txt"
+      ],
+      "hit": null,
+      "rr": null,
+      "seconds": 1.1935859579825774,
+      "guardrail": null,
+      "rewritten_query": null
+    },
+    {
+      "config": "hdr-prompt",
+      "item_id": "p02",
+      "type": "factual",
+      "question": "In which year did they build the 100 qubit quantum processor?",
+      "answer": "The 100-qubit quantum processor was built in 2030.",
+      "abstained": false,
+      "correct": true,
+      "sources": [
+        "2030.txt",
+        "2031.txt",
+        "2035.txt",
+        "2030.txt"
+      ],
+      "hit": true,
+      "rr": 1.0,
+      "seconds": 0.3861389169469476,
+      "guardrail": null,
+      "rewritten_query": null
+    },
+    {
+      "config": "hdr-prompt",
+      "item_id": "p03",
+      "type": "factual",
+      "question": "When did Quantum mind's stock hit rock bottom?",
+      "answer": "According to the 2032 shareholder letter, QuantumMind's stock price hit an all-time low that year, reflecting the market's loss of confidence. The 2034 letter does not specify an earlier lower point, so the rock bottom occurred in 2032.",
+      "abstained": true,
+      "correct": false,
+      "sources": [
+        "2033.txt",
+        "2034.txt",
+        "2032.txt",
+        "2034.txt"
+      ],
+      "hit": true,
+      "rr": 1.0,
+      "seconds": 2.270710499957204,
+      "guardrail": null,
+      "rewritten_query": null
+    },
+    {
+      "config": "hdr-prompt",
+      "item_id": "p04",
+      "type": "factual",
+      "question": "Did the company ever have a sense of frustration or aggression about the Quantum-AI space, in which year?",
+      "answer": "Yes, the company expressed frustration about the Quantum-AI space in 2032. The 2032 shareholder letter mentions \"Increased competition in the quantum-AI space, putting pressure on our market position\" and notes that \"our financial performance has been below expectations, and our stock price has reflected these difficulties.\" The CEO also acknowledged \"the frustration this may cause for our shareholders\" in the same year.",
+      "abstained": false,
+      "correct": true,
+      "sources": [
+        "2031.txt",
+        "2032.txt",
+        "2030.txt",
+        "2032.txt"
+      ],
+      "hit": true,
+      "rr": 0.5,
+      "seconds": 2.8849835000000894,
+      "guardrail": null,
+      "rewritten_query": null
+    },
+    {
+      "config": "hdr-prompt",
+      "item_id": "p05",
+      "type": "summary",
+      "question": "What were the main points of the 2032 shareholder letter?",
+      "answer": "The 2032 shareholder letter highlighted ongoing struggles with error correction in quantum systems, delays in developing the next-generation quantum processor, and increased competition in the quantum-AI space. Despite these challenges, the letter emphasized areas of potential and continued progress.",
+      "abstained": false,
+      "correct": true,
+      "sources": [
+        "2032.txt",
+        "2034.txt",
+        "2030.txt",
+        "2033.txt"
+      ],
+      "hit": true,
+      "rr": 1.0,
+      "seconds": 2.374211124959402,
+      "guardrail": null,
+      "rewritten_query": null
+    },
+    {
+      "config": "hdr-prompt",
+      "item_id": "x03",
+      "type": "factual",
+      "question": "How many qubits did QuantumMind have in 2031?",
+      "answer": "In 2031, QuantumMind had expanded its quantum hardware capabilities to reach 250 qubits.",
+      "abstained": false,
+      "correct": true,
+      "sources": [
+        "2030.txt",
+        "2031.txt",
+        "2035.txt",
+        "2030.txt"
+      ],
+      "hit": true,
+      "rr": 0.5,
+      "seconds": 0.5545041669392958,
+      "guardrail": null,
+      "rewritten_query": null
+    },
+    {
+      "config": "hdr-prompt",
+      "item_id": "u01",
+      "type": "unanswerable",
+      "question": "Was the CEO involved in a scandal?",
+      "answer": "I don't know. The provided context doesn't mention any CEO scandal.",
+      "abstained": true,
+      "correct": true,
+      "sources": [
+        "2034.txt",
+        "2033.txt",
+        "2032.txt",
+        "2033.txt"
+      ],
+      "hit": null,
+      "rr": null,
+      "seconds": 1.3981552500044927,
+      "guardrail": null,
+      "rewritten_query": null
+    },
+    {
+      "config": "hdr-prompt",
+      "item_id": "u02",
+      "type": "unanswerable",
+      "question": "what was the max qubits that Quantum mind reached in 2023?",
+      "answer": "I don't know the answer.",
+      "abstained": true,
+      "correct": true,
+      "sources": [
+        "2030.txt",
+        "2031.txt",
+        "2035.txt",
+        "2030.txt"
+      ],
+      "hit": null,
+      "rr": null,
+      "seconds": 0.28971116710454226,
+      "guardrail": null,
+      "rewritten_query": null
+    },
+    {
+      "config": "hdr-prompt",
+      "item_id": "x01",
+      "type": "unanswerable",
+      "question": "What was QuantumMind's revenue in 2036?",
+      "answer": "I don't know. The provided context does not include any information about QuantumMind's revenue in 2036.",
+      "abstained": true,
+      "correct": true,
+      "sources": [
+        "2031.txt",
+        "2030.txt",
+        "2030.txt",
+        "2034.txt"
+      ],
+      "hit": null,
+      "rr": null,
+      "seconds": 1.4936022920301184,
+      "guardrail": null,
+      "rewritten_query": null
+    },
+    {
+      "config": "hdr-prompt",
+      "item_id": "x02",
+      "type": "unanswerable",
+      "question": "Who was QuantumMind's CFO?",
+      "answer": "I don't know. The provided context doesn't mention a CFO.",
+      "abstained": true,
+      "correct": true,
+      "sources": [
+        "2031.txt",
+        "2034.txt",
+        "2030.txt",
+        "2035.txt"
+      ],
+      "hit": null,
+      "rr": null,
+      "seconds": 1.3326545410091057,
+      "guardrail": null,
+      "rewritten_query": null
+    },
+    {
+      "config": "tagged",
+      "item_id": "q01",
+      "type": "factual",
+      "question": "How many qubits did QuantumMind's first quantum processor achieve?",
+      "answer": "[source: 2030.txt | year: 2030] Our first 100-qubit quantum processor [source: 2030.txt | year: 2030].",
+      "abstained": false,
+      "correct": true,
+      "sources": [
+        "2030.txt",
+        "2031.txt",
+        "2035.txt",
+        "2030.txt"
+      ],
+      "hit": true,
+      "rr": 1.0,
+      "seconds": 2.187094916938804,
+      "guardrail": null,
+      "rewritten_query": null
+    },
+    {
+      "config": "tagged",
+      "item_id": "q02",
+      "type": "factual",
+      "question": "What specific area of AI did QuantumMind make groundbreaking advancements in?",
+      "answer": "[source: 2030.txt | year: 2030] QuantumMind's AI division made groundbreaking advancements in quantum machine learning algorithms, showing promise in solving complex optimization problems. [source: 2031.txt | year: 2031] The company also achieved quantum supremacy in a specific machine learning task, outperforming classical supercomputers. [source: 2032.txt | year: 2032] The AI team developed new classical algorithms inspired by quantum principles, showing promise in certain optimization problems.",
+      "abstained": false,
+      "correct": true,
+      "sources": [
+        "2030.txt",
+        "2031.txt",
+        "2030.txt",
+        "2032.txt"
+      ],
+      "hit": true,
+      "rr": 1.0,
+      "seconds": 2.9272097499342635,
+      "guardrail": null,
+      "rewritten_query": null
+    },
+    {
+      "config": "tagged",
+      "item_id": "q03",
+      "type": "factual",
+      "question": "What milestone did QuantumMind achieve in terms of quantum supremacy?",
+      "answer": "[source: 2031.txt | year: 2031] QuantumMind achieved the successful demonstration of quantum supremacy in a specific machine learning task, outperforming classical supercomputers.",
+      "abstained": false,
+      "correct": true,
+      "sources": [
+        "2031.txt",
+        "2030.txt",
+        "2030.txt",
+        "2035.txt"
+      ],
+      "hit": true,
+      "rr": 1.0,
+      "seconds": 2.1555577920516953,
+      "guardrail": null,
+      "rewritten_query": null
+    },
+    {
+      "config": "tagged",
+      "item_id": "q04",
+      "type": "factual",
+      "question": "What new service did QuantumMind launch for select partners?",
+      "answer": "[source: 2031.txt | year: 2031] Launch of our first commercial quantum cloud service, allowing select partners to experiment with our technology.",
+      "abstained": false,
+      "correct": true,
+      "sources": [
+        "2030.txt",
+        "2031.txt",
+        "2030.txt",
+        "2031.txt"
+      ],
+      "hit": true,
+      "rr": 0.5,
+      "seconds": 1.271515000029467,
+      "guardrail": null,
+      "rewritten_query": null
+    },
+    {
+      "config": "tagged",
+      "item_id": "q05",
+      "type": "factual",
+      "question": "What specific challenge did QuantumMind face with their quantum systems?",
+      "answer": "[source: 2032.txt | year: 2032] Ongoing struggles with error correction in their quantum systems, limiting practical applications [source: 2032.txt | year: 2032] Increased competition in the quantum-AI space, putting pressure on their market position [source: 2032.txt | year: 2032]",
+      "abstained": false,
+      "correct": true,
+      "sources": [
+        "2032.txt",
+        "2031.txt",
+        "2032.txt",
+        "2030.txt"
+      ],
+      "hit": true,
+      "rr": 1.0,
+      "seconds": 3.0275019999826327,
+      "guardrail": null,
+      "rewritten_query": null
+    },
+    {
+      "config": "tagged",
+      "item_id": "q06",
+      "type": "factual",
+      "question": "In what area did QuantumMind's AI team show promise despite overall setbacks?",
+      "answer": "[source: 2032.txt | year: 2032] Our AI team has developed new classical algorithms inspired by quantum principles, showing promise in certain optimization problems. [source: 2032.txt | year: 2032]",
+      "abstained": false,
+      "correct": true,
+      "sources": [
+        "2030.txt",
+        "2031.txt",
+        "2032.txt",
+        "2032.txt"
+      ],
+      "hit": true,
+      "rr": 0.3333333333333333,
+      "seconds": 1.94676454202272,
+      "guardrail": null,
+      "rewritten_query": null
+    },
+    {
+      "config": "tagged",
+      "item_id": "q07",
+      "type": "factual",
+      "question": "What drastic measure did QuantumMind take regarding its workforce?",
+      "answer": "[source: 2034.txt | year: 2034] The company removed the CEO due to its dire financial situation and lack of progress [source: 2034.txt | year: 2034] Then, the CEO's reinstatement came after extraordinary events [source: 2034.txt | year: 2034] And the company secured emergency funding from a consortium of tech investors, which allowed them to rehire key personnel [source: 2034.txt | year: 2034].",
+      "abstained": false,
+      "correct": false,
+      "sources": [
+        "2030.txt",
+        "2034.txt",
+        "2031.txt",
+        "2035.txt"
+      ],
+      "hit": false,
+      "rr": 0.0,
+      "seconds": 3.814556499943137,
+      "guardrail": null,
+      "rewritten_query": null
+    },
+    {
+      "config": "tagged",
+      "item_id": "q08",
+      "type": "factual",
+      "question": "What alternative approach is QuantumMind exploring to generate near-term revenue?",
+      "answer": "[source: 2032.txt | year: 2032] Our quantum cloud service has seen growing interest from the research community, if not yet from commercial clients. [source: 2031.txt | year: 2031] Launch of our first commercial quantum cloud service, allowing select partners to experiment with our technology. [source: 2030.txt | year: 2030] We've secured partnerships with leading research institutions and tech giants, positioning us as a key player in the quantum-AI ecosystem. [source: 2031.txt | year: 2031] We believe in the long-term potential of quantum computing and its synergy with AI. While the path is proving more difficult than we initially hoped, we remain committed to our vision and are working tirelessly to overcome these obstacles. [source: 2032.txt | year: 2032]",
+      "abstained": false,
+      "correct": false,
+      "sources": [
+        "2032.txt",
+        "2031.txt",
+        "2030.txt",
+        "2031.txt"
+      ],
+      "hit": false,
+      "rr": 0.0,
+      "seconds": 5.221585541963577,
+      "guardrail": null,
+      "rewritten_query": null
+    },
+    {
+      "config": "tagged",
+      "item_id": "q09",
+      "type": "factual",
+      "question": "What led to the CEO's initial removal and subsequent reinstatement?",
+      "answer": "[source: 2034.txt | year: 2034] The CEO was removed due to the company's dire financial situation and lack of progress [source: 2034.txt | year: 2034]. [source: 2034.txt | year: 2034] His reinstatement came after recent extraordinary events that renewed hope for the company's future [source: 2034.txt | year: 2034].",
+      "abstained": false,
+      "correct": false,
+      "sources": [
+        "2034.txt",
+        "2034.txt",
+        "2033.txt",
+        "2035.txt"
+      ],
+      "hit": true,
+      "rr": 1.0,
+      "seconds": 4.280680582975037,
+      "guardrail": null,
+      "rewritten_query": null
+    },
+    {
+      "config": "tagged",
+      "item_id": "q10",
+      "type": "factual",
+      "question": "How many qubits did QuantumMind's new stable system achieve?",
+      "answer": "[source: 2034.txt | year: 2034] The small team's breakthrough in quantum error correction led to a stable 1000-qubit system [source: 2034.txt | year: 2034].",
+      "abstained": false,
+      "correct": true,
+      "sources": [
+        "2031.txt",
+        "2030.txt",
+        "2035.txt",
+        "2034.txt"
+      ],
+      "hit": true,
+      "rr": 0.25,
+      "seconds": 2.1500237500295043,
+      "guardrail": null,
+      "rewritten_query": null
+    },
+    {
+      "config": "tagged",
+      "item_id": "q11",
+      "type": "factual",
+      "question": "To how many qubits did QuantumMind scale their quantum system?",
+      "answer": "[source: 2035.txt | year: 2035] states that QuantumMind scaled their quantum system to 10,000 qubits while maintaining unprecedented coherence times.",
+      "abstained": false,
+      "correct": true,
+      "sources": [
+        "2031.txt",
+        "2030.txt",
+        "2035.txt",
+        "2034.txt"
+      ],
+      "hit": true,
+      "rr": 0.3333333333333333,
+      "seconds": 0.9785776670323685,
+      "guardrail": null,
+      "rewritten_query": null
+    },
+    {
+      "config": "tagged",
+      "item_id": "q12",
+      "type": "factual",
+      "question": "In which specific industries did QuantumMind's quantum-AI hybrid systems show exponential speedups?",
+      "answer": "[source: 2035.txt | year: 2035] Our quantum-AI hybrid systems have shown exponential speedups in drug discovery, leading to collaborations with five of the world's largest pharmaceutical companies.",
+      "abstained": false,
+      "correct": true,
+      "sources": [
+        "2030.txt",
+        "2031.txt",
+        "2035.txt",
+        "2030.txt"
+      ],
+      "hit": true,
+      "rr": 0.3333333333333333,
+      "seconds": 1.881363624939695,
+      "guardrail": null,
+      "rewritten_query": null
+    },
+    {
+      "config": "tagged",
+      "item_id": "p01",
+      "type": "factual",
+      "question": "Who is the CEO of QuantumMind?",
+      "answer": "[source: 2031.txt | year: 2031] The letter is signed \"Sincerely, Dr. Quentin Bohr, CEO, QuantumMind\" [source: 2030.txt | year: 2030] The letter is signed \"Sincerely, Dr. Quentin Bohr, CEO, QuantumMind\" [source: 2035.txt | year: 2035] The letter is signed \"Sincerely, Dr. Quentin Bohr, CEO, QuantumMind\". Therefore, the CEO of QuantumMind is Dr. Quentin Bohr.",
+      "abstained": false,
+      "correct": true,
+      "sources": [
+        "2031.txt",
+        "2030.txt",
+        "2033.txt",
+        "2035.txt"
+      ],
+      "hit": null,
+      "rr": null,
+      "seconds": 4.5403069170424715,
+      "guardrail": null,
+      "rewritten_query": null
+    },
+    {
+      "config": "tagged",
+      "item_id": "p02",
+      "type": "factual",
+      "question": "In which year did they build the 100 qubit quantum processor?",
+      "answer": "[source: 2030.txt | year: 2030] states that they successfully developed their first 100-qubit quantum processor. [source: 2031.txt | year: 2031] mentions reaching 250 qubits, which is later. Therefore, the 100-qubit processor was built in 2030.",
+      "abstained": false,
+      "correct": true,
+      "sources": [
+        "2030.txt",
+        "2031.txt",
+        "2035.txt",
+        "2030.txt"
+      ],
+      "hit": true,
+      "rr": 1.0,
+      "seconds": 2.0272126250201836,
+      "guardrail": null,
+      "rewritten_query": null
+    },
+    {
+      "config": "tagged",
+      "item_id": "p03",
+      "type": "factual",
+      "question": "When did Quantum mind's stock hit rock bottom?",
+      "answer": "[source: 2033.txt | year: 2033] states that QuantumMind's stock price hit an all-time low, reflecting the market's loss of confidence. [source: 2034.txt | year: 2034] mentions the stock price was still far below its peak at that time. Therefore, the stock hit rock bottom in 2033.",
+      "abstained": false,
+      "correct": true,
+      "sources": [
+        "2033.txt",
+        "2034.txt",
+        "2032.txt",
+        "2034.txt"
+      ],
+      "hit": true,
+      "rr": 1.0,
+      "seconds": 4.831535000004806,
+      "guardrail": null,
+      "rewritten_query": null
+    },
+    {
+      "config": "tagged",
+      "item_id": "p04",
+      "type": "factual",
+      "question": "Did the company ever have a sense of frustration or aggression about the Quantum-AI space, in which year?",
+      "answer": "[source: 2032.txt | year: 2032] The company acknowledged that \"Increased competition in the quantum-AI space, putting pressure on our market position\" [source: 2032.txt | year: 2032]. [source: 2032.txt | year: 2032] The same document also mentioned that \"Our financial performance has been below expectations, and our stock price has reflected these difficulties. We understand the frustration this may cause for our shareholders\" [source: 2032.txt | year: 2032].",
+      "abstained": false,
+      "correct": true,
+      "sources": [
+        "2031.txt",
+        "2032.txt",
+        "2030.txt",
+        "2032.txt"
+      ],
+      "hit": true,
+      "rr": 0.5,
+      "seconds": 5.345347041962668,
+      "guardrail": null,
+      "rewritten_query": null
+    },
+    {
+      "config": "tagged",
+      "item_id": "p05",
+      "type": "summary",
+      "question": "What were the main points of the 2032 shareholder letter?",
+      "answer": "[source: 2032.txt | year: 2032] The 2032 shareholder letter highlighted ongoing struggles with error correction in quantum systems, delays in the next-generation quantum processor, and increased competition in the quantum-AI space. [source: 2032.txt | year: 2032] Despite these challenges, the letter noted some progress. [source: 2032.txt | year: 2032]",
+      "abstained": false,
+      "correct": true,
+      "sources": [
+        "2032.txt",
+        "2034.txt",
+        "2030.txt",
+        "2033.txt"
+      ],
+      "hit": true,
+      "rr": 1.0,
+      "seconds": 5.197089291992597,
+      "guardrail": null,
+      "rewritten_query": null
+    },
+    {
+      "config": "tagged",
+      "item_id": "x03",
+      "type": "factual",
+      "question": "How many qubits did QuantumMind have in 2031?",
+      "answer": "[source: 2031.txt | year: 2031] Expansion of our quantum hardware capabilities, now reaching 250 qubits.",
+      "abstained": false,
+      "correct": true,
+      "sources": [
+        "2030.txt",
+        "2031.txt",
+        "2035.txt",
+        "2030.txt"
+      ],
+      "hit": true,
+      "rr": 0.5,
+      "seconds": 1.0821058340370655,
+      "guardrail": null,
+      "rewritten_query": null
+    },
+    {
+      "config": "tagged",
+      "item_id": "u01",
+      "type": "unanswerable",
+      "question": "Was the CEO involved in a scandal?",
+      "answer": "[source: 2034.txt | year: 2034] does not mention any scandal involving the CEO. [source: 2033.txt | year: 2033] does not mention any scandal involving the CEO. [source: 2032.txt | year: 2032] does not mention any scandal involving the CEO.",
+      "abstained": true,
+      "correct": true,
+      "sources": [
+        "2034.txt",
+        "2033.txt",
+        "2032.txt",
+        "2033.txt"
+      ],
+      "hit": null,
+      "rr": null,
+      "seconds": 3.944374250015244,
+      "guardrail": null,
+      "rewritten_query": null
+    },
+    {
+      "config": "tagged",
+      "item_id": "u02",
+      "type": "unanswerable",
+      "question": "what was the max qubits that Quantum mind reached in 2023?",
+      "answer": "[source: 2030.txt | year: 2030] mentions reaching the first 100-qubit quantum processor. [source: 2031.txt | year: 2031] states that quantum hardware capabilities reached 250 qubits. [source: 2035.txt | year: 2035] notes scaling to 10,000 qubits. Therefore, the maximum qubits reached in 2023 was 250.",
+      "abstained": false,
+      "correct": false,
+      "sources": [
+        "2030.txt",
+        "2031.txt",
+        "2035.txt",
+        "2030.txt"
+      ],
+      "hit": null,
+      "rr": null,
+      "seconds": 3.2759437080239877,
+      "guardrail": null,
+      "rewritten_query": null
+    },
+    {
+      "config": "tagged",
+      "item_id": "x01",
+      "type": "unanswerable",
+      "question": "What was QuantumMind's revenue in 2036?",
+      "answer": "I don't know. The provided context does not include any information about QuantumMind's revenue in 2036.",
+      "abstained": true,
+      "correct": true,
+      "sources": [
+        "2031.txt",
+        "2030.txt",
+        "2030.txt",
+        "2034.txt"
+      ],
+      "hit": null,
+      "rr": null,
+      "seconds": 2.6207656250335276,
+      "guardrail": null,
+      "rewritten_query": null
+    },
+    {
+      "config": "tagged",
+      "item_id": "x02",
+      "type": "unanswerable",
+      "question": "Who was QuantumMind's CFO?",
+      "answer": "I don't know. The provided documents don't mention a CFO.",
+      "abstained": true,
+      "correct": true,
+      "sources": [
+        "2031.txt",
+        "2034.txt",
+        "2030.txt",
+        "2035.txt"
+      ],
+      "hit": null,
+      "rr": null,
+      "seconds": 2.2391307500656694,
+      "guardrail": null,
+      "rewritten_query": null
+    },
+    {
+      "config": "mmr",
+      "item_id": "q01",
+      "type": "factual",
+      "question": "How many qubits did QuantumMind's first quantum processor achieve?",
+      "answer": "According to the provided context, QuantumMind's first quantum processor achieved 100 qubits.",
+      "abstained": false,
+      "correct": true,
+      "sources": [
+        "2030.txt",
+        "2034.txt",
+        "2030.txt",
+        "2031.txt"
+      ],
+      "hit": true,
+      "rr": 1.0,
+      "seconds": 1.488487083115615,
+      "guardrail": null,
+      "rewritten_query": null
+    },
+    {
+      "config": "mmr",
+      "item_id": "q02",
+      "type": "factual",
+      "question": "What specific area of AI did QuantumMind make groundbreaking advancements in?",
+      "answer": "According to the provided context, QuantumMind made groundbreaking advancements in quantum machine learning algorithms.",
+      "abstained": false,
+      "correct": true,
+      "sources": [
+        "2030.txt",
+        "2030.txt",
+        "2031.txt",
+        "2035.txt"
+      ],
+      "hit": true,
+      "rr": 1.0,
+      "seconds": 1.9855169169604778,
+      "guardrail": null,
+      "rewritten_query": null
+    },
+    {
+      "config": "mmr",
+      "item_id": "q03",
+      "type": "factual",
+      "question": "What milestone did QuantumMind achieve in terms of quantum supremacy?",
+      "answer": "In the year 2031, QuantumMind reported the successful demonstration of quantum supremacy in a specific machine learning task, outperforming classical supercomputers.",
+      "abstained": false,
+      "correct": true,
+      "sources": [
+        "2031.txt",
+        "2030.txt",
+        "2035.txt",
+        "2035.txt"
+      ],
+      "hit": true,
+      "rr": 1.0,
+      "seconds": 2.0812640408985317,
+      "guardrail": null,
+      "rewritten_query": null
+    },
+    {
+      "config": "mmr",
+      "item_id": "q04",
+      "type": "factual",
+      "question": "What new service did QuantumMind launch for select partners?",
+      "answer": "I don't know the answer.",
+      "abstained": true,
+      "correct": false,
+      "sources": [
+        "2030.txt",
+        "2030.txt",
+        "2032.txt",
+        "2034.txt"
+      ],
+      "hit": false,
+      "rr": 0.0,
+      "seconds": 1.561691208044067,
+      "guardrail": null,
+      "rewritten_query": null
+    },
+    {
+      "config": "mmr",
+      "item_id": "q05",
+      "type": "factual",
+      "question": "What specific challenge did QuantumMind face with their quantum systems?",
+      "answer": "According to the 2032 shareholder letter, QuantumMind faced ongoing struggles with error correction in their quantum systems, which limited the practical applications of their technology.",
+      "abstained": false,
+      "correct": true,
+      "sources": [
+        "2032.txt",
+        "2035.txt",
+        "2032.txt",
+        "2030.txt"
+      ],
+      "hit": true,
+      "rr": 1.0,
+      "seconds": 2.3858988330466673,
+      "guardrail": null,
+      "rewritten_query": null
+    },
+    {
+      "config": "mmr",
+      "item_id": "q06",
+      "type": "factual",
+      "question": "In what area did QuantumMind's AI team show promise despite overall setbacks?",
+      "answer": "Despite overall setbacks, QuantumMind's AI team showed promise in developing new classical algorithms inspired by quantum principles, which demonstrated potential in certain optimization problems.",
+      "abstained": false,
+      "correct": true,
+      "sources": [
+        "2030.txt",
+        "2032.txt",
+        "2032.txt",
+        "2031.txt"
+      ],
+      "hit": true,
+      "rr": 0.5,
+      "seconds": 2.972226749989204,
+      "guardrail": null,
+      "rewritten_query": null
+    },
+    {
+      "config": "mmr",
+      "item_id": "q07",
+      "type": "factual",
+      "question": "What drastic measure did QuantumMind take regarding its workforce?",
+      "answer": "In the year 2033, QuantumMind significantly downsized its workforce as part of its efforts to address financial challenges following the failure of its quantum computing initiatives.",
+      "abstained": false,
+      "correct": true,
+      "sources": [
+        "2030.txt",
+        "2033.txt",
+        "2035.txt",
+        "2035.txt"
+      ],
+      "hit": true,
+      "rr": 0.5,
+      "seconds": 6.5171333339530975,
+      "guardrail": null,
+      "rewritten_query": null
+    },
+    {
+      "config": "mmr",
+      "item_id": "q08",
+      "type": "factual",
+      "question": "What alternative approach is QuantumMind exploring to generate near-term revenue?",
+      "answer": "I don't know the answer.",
+      "abstained": true,
+      "correct": false,
+      "sources": [
+        "2032.txt",
+        "2035.txt",
+        "2030.txt",
+        "2034.txt"
+      ],
+      "hit": false,
+      "rr": 0.0,
+      "seconds": 3.8311507500475273,
+      "guardrail": null,
+      "rewritten_query": null
+    },
+    {
+      "config": "mmr",
+      "item_id": "q09",
+      "type": "factual",
+      "question": "What led to the CEO's initial removal and subsequent reinstatement?",
+      "answer": "The CEO was initially removed due to the company's dire financial situation and lack of progress. His reinstatement came after recent extraordinary events that brought renewed hope and excitement for the future.",
+      "abstained": false,
+      "correct": false,
+      "sources": [
+        "2034.txt",
+        "2033.txt",
+        "2035.txt",
+        "2032.txt"
+      ],
+      "hit": true,
+      "rr": 1.0,
+      "seconds": 3.537400000030175,
+      "guardrail": null,
+      "rewritten_query": null
+    },
+    {
+      "config": "mmr",
+      "item_id": "q10",
+      "type": "factual",
+      "question": "How many qubits did QuantumMind's new stable system achieve?",
+      "answer": "The new stable system achieved 1000 qubits.",
+      "abstained": false,
+      "correct": true,
+      "sources": [
+        "2031.txt",
+        "2034.txt",
+        "2035.txt",
+        "2030.txt"
+      ],
+      "hit": true,
+      "rr": 0.5,
+      "seconds": 3.5753717080224305,
+      "guardrail": null,
+      "rewritten_query": null
+    },
+    {
+      "config": "mmr",
+      "item_id": "q11",
+      "type": "factual",
+      "question": "To how many qubits did QuantumMind scale their quantum system?",
+      "answer": "According to the 2035 metadata, QuantumMind scaled their quantum system to 10,000 qubits while maintaining unprecedented coherence times.",
+      "abstained": false,
+      "correct": true,
+      "sources": [
+        "2031.txt",
+        "2035.txt",
+        "2030.txt",
+        "2035.txt"
+      ],
+      "hit": true,
+      "rr": 0.5,
+      "seconds": 3.319926333031617,
+      "guardrail": null,
+      "rewritten_query": null
+    },
+    {
+      "config": "mmr",
+      "item_id": "q12",
+      "type": "factual",
+      "question": "In which specific industries did QuantumMind's quantum-AI hybrid systems show exponential speedups?",
+      "answer": "According to the 2035 metadata, QuantumMind's quantum-AI hybrid systems showed exponential speedups in **drug discovery**.",
+      "abstained": false,
+      "correct": true,
+      "sources": [
+        "2030.txt",
+        "2034.txt",
+        "2032.txt",
+        "2035.txt"
+      ],
+      "hit": true,
+      "rr": 0.25,
+      "seconds": 3.4789642919786274,
+      "guardrail": null,
+      "rewritten_query": null
+    },
+    {
+      "config": "mmr",
+      "item_id": "p01",
+      "type": "factual",
+      "question": "Who is the CEO of QuantumMind?",
+      "answer": "The CEO of QuantumMind is Dr. Quentin Bohr, as indicated in the 2031 metadata. However, the 2034 metadata mentions that the CEO was removed earlier that year and later reinstated, but does not name a replacement.",
+      "abstained": false,
+      "correct": true,
+      "sources": [
+        "2031.txt",
+        "2030.txt",
+        "2034.txt",
+        "2032.txt"
+      ],
+      "hit": null,
+      "rr": null,
+      "seconds": 6.354493000078946,
+      "guardrail": null,
+      "rewritten_query": null
+    },
+    {
+      "config": "mmr",
+      "item_id": "p02",
+      "type": "factual",
+      "question": "In which year did they build the 100 qubit quantum processor?",
+      "answer": "According to the provided context, the 100-qubit quantum processor was developed in the year 2030.",
+      "abstained": false,
+      "correct": true,
+      "sources": [
+        "2030.txt",
+        "2035.txt",
+        "2034.txt",
+        "2031.txt"
+      ],
+      "hit": true,
+      "rr": 1.0,
+      "seconds": 4.0548680840292946,
+      "guardrail": null,
+      "rewritten_query": null
+    },
+    {
+      "config": "mmr",
+      "item_id": "p03",
+      "type": "factual",
+      "question": "When did Quantum mind's stock hit rock bottom?",
+      "answer": "According to the 2030 metadata, QuantumMind's stock price hit an all-time low that year. The 2034 letter also references the market's loss of confidence in the company's ability to deliver on quantum computing promises, indicating the stock reached rock bottom during that period.",
+      "abstained": false,
+      "correct": false,
+      "sources": [
+        "2033.txt",
+        "2030.txt",
+        "2031.txt",
+        "2034.txt"
+      ],
+      "hit": true,
+      "rr": 1.0,
+      "seconds": 5.291812999988906,
+      "guardrail": null,
+      "rewritten_query": null
+    },
+    {
+      "config": "mmr",
+      "item_id": "p04",
+      "type": "factual",
+      "question": "Did the company ever have a sense of frustration or aggression about the Quantum-AI space, in which year?",
+      "answer": "Yes, the company expressed a sense of frustration and increased competition in the quantum-AI space in 2032.",
+      "abstained": false,
+      "correct": true,
+      "sources": [
+        "2031.txt",
+        "2033.txt",
+        "2032.txt",
+        "2032.txt"
+      ],
+      "hit": true,
+      "rr": 0.3333333333333333,
+      "seconds": 4.103787374915555,
+      "guardrail": null,
+      "rewritten_query": null
+    },
+    {
+      "config": "mmr",
+      "item_id": "p05",
+      "type": "summary",
+      "question": "What were the main points of the 2032 shareholder letter?",
+      "answer": "The 2032 shareholder letter highlighted ongoing struggles with error correction in quantum systems, delays in developing the next-generation quantum processor, and increased competition in the quantum-AI space. Despite these challenges, the letter emphasized areas of potential as the company continued to work on these issues.",
+      "abstained": false,
+      "correct": true,
+      "sources": [
+        "2032.txt",
+        "2034.txt",
+        "2035.txt",
+        "2033.txt"
+      ],
+      "hit": true,
+      "rr": 1.0,
+      "seconds": 3.6825470000039786,
+      "guardrail": null,
+      "rewritten_query": null
+    },
+    {
+      "config": "mmr",
+      "item_id": "x03",
+      "type": "factual",
+      "question": "How many qubits did QuantumMind have in 2031?",
+      "answer": "I don't know. The provided context does not include information about the number of qubits QuantumMind had in 2031.",
+      "abstained": true,
+      "correct": false,
+      "sources": [
+        "2030.txt",
+        "2033.txt",
+        "2030.txt",
+        "2035.txt"
+      ],
+      "hit": false,
+      "rr": 0.0,
+      "seconds": 2.3691449579782784,
+      "guardrail": null,
+      "rewritten_query": null
+    },
+    {
+      "config": "mmr",
+      "item_id": "u01",
+      "type": "unanswerable",
+      "question": "Was the CEO involved in a scandal?",
+      "answer": "I don't know. The provided context doesn't mention any CEO scandal.",
+      "abstained": true,
+      "correct": true,
+      "sources": [
+        "2034.txt",
+        "2033.txt",
+        "2035.txt",
+        "2032.txt"
+      ],
+      "hit": null,
+      "rr": null,
+      "seconds": 1.2559020839398727,
+      "guardrail": null,
+      "rewritten_query": null
+    },
+    {
+      "config": "mmr",
+      "item_id": "u02",
+      "type": "unanswerable",
+      "question": "what was the max qubits that Quantum mind reached in 2023?",
+      "answer": "I don't know the answer.",
+      "abstained": true,
+      "correct": true,
+      "sources": [
+        "2030.txt",
+        "2033.txt",
+        "2030.txt",
+        "2035.txt"
+      ],
+      "hit": null,
+      "rr": null,
+      "seconds": 1.3020307500846684,
+      "guardrail": null,
+      "rewritten_query": null
+    },
+    {
+      "config": "mmr",
+      "item_id": "x01",
+      "type": "unanswerable",
+      "question": "What was QuantumMind's revenue in 2036?",
+      "answer": "I don't know. The provided context does not include any information about QuantumMind's revenue in 2036.",
+      "abstained": true,
+      "correct": true,
+      "sources": [
+        "2031.txt",
+        "2033.txt",
+        "2034.txt",
+        "2035.txt"
+      ],
+      "hit": null,
+      "rr": null,
+      "seconds": 3.371386958984658,
+      "guardrail": null,
+      "rewritten_query": null
+    },
+    {
+      "config": "mmr",
+      "item_id": "x02",
+      "type": "unanswerable",
+      "question": "Who was QuantumMind's CFO?",
+      "answer": "I don't know the answer.",
+      "abstained": true,
+      "correct": true,
+      "sources": [
+        "2031.txt",
+        "2035.txt",
+        "2034.txt",
+        "2030.txt"
+      ],
+      "hit": null,
+      "rr": null,
+      "seconds": 2.6304670000681654,
+      "guardrail": null,
+      "rewritten_query": null
+    },
+    {
+      "config": "mmr-k2",
+      "item_id": "q01",
+      "type": "factual",
+      "question": "How many qubits did QuantumMind's first quantum processor achieve?",
+      "answer": "QuantumMind's first quantum processor achieved 100 qubits.",
+      "abstained": false,
+      "correct": true,
+      "sources": [
+        "2030.txt",
+        "2034.txt"
+      ],
+      "hit": true,
+      "rr": 1.0,
+      "seconds": 1.0518861250020564,
+      "guardrail": null,
+      "rewritten_query": null
+    },
+    {
+      "config": "mmr-k2",
+      "item_id": "q02",
+      "type": "factual",
+      "question": "What specific area of AI did QuantumMind make groundbreaking advancements in?",
+      "answer": "QuantumMind made groundbreaking advancements in quantum machine learning algorithms. These advancements are highlighted in the context of their AI division's progress.",
+      "abstained": false,
+      "correct": true,
+      "sources": [
+        "2030.txt",
+        "2030.txt"
+      ],
+      "hit": true,
+      "rr": 1.0,
+      "seconds": 1.6875348329776898,
+      "guardrail": null,
+      "rewritten_query": null
+    },
+    {
+      "config": "mmr-k2",
+      "item_id": "q03",
+      "type": "factual",
+      "question": "What milestone did QuantumMind achieve in terms of quantum supremacy?",
+      "answer": "In 2031, QuantumMind reported the successful demonstration of quantum supremacy in a specific machine learning task, outperforming classical supercomputers.",
+      "abstained": false,
+      "correct": true,
+      "sources": [
+        "2031.txt",
+        "2030.txt"
+      ],
+      "hit": true,
+      "rr": 1.0,
+      "seconds": 2.387837457936257,
+      "guardrail": null,
+      "rewritten_query": null
+    },
+    {
+      "config": "mmr-k2",
+      "item_id": "q04",
+      "type": "factual",
+      "question": "What new service did QuantumMind launch for select partners?",
+      "answer": "I don't know the answer.",
+      "abstained": true,
+      "correct": false,
+      "sources": [
+        "2030.txt",
+        "2030.txt"
+      ],
+      "hit": false,
+      "rr": 0.0,
+      "seconds": 2.272023207973689,
+      "guardrail": null,
+      "rewritten_query": null
+    },
+    {
+      "config": "mmr-k2",
+      "item_id": "q05",
+      "type": "factual",
+      "question": "What specific challenge did QuantumMind face with their quantum systems?",
+      "answer": "The specific challenge QuantumMind faced was that their financial performance had been below expectations, and their stock price reflected these difficulties. The company was taking aggressive steps to address these challenges and refocus their efforts.",
+      "abstained": false,
+      "correct": false,
+      "sources": [
+        "2032.txt",
+        "2035.txt"
+      ],
+      "hit": true,
+      "rr": 1.0,
+      "seconds": 4.846182249952108,
+      "guardrail": null,
+      "rewritten_query": null
+    },
+    {
+      "config": "mmr-k2",
+      "item_id": "q06",
+      "type": "factual",
+      "question": "In what area did QuantumMind's AI team show promise despite overall setbacks?",
+      "answer": "Despite overall setbacks, QuantumMind's AI team showed promise in quantum machine learning algorithms.",
+      "abstained": false,
+      "correct": false,
+      "sources": [
+        "2030.txt",
+        "2032.txt"
+      ],
+      "hit": true,
+      "rr": 0.5,
+      "seconds": 4.030434041982517,
+      "guardrail": null,
+      "rewritten_query": null
+    },
+    {
+      "config": "mmr-k2",
+      "item_id": "q07",
+      "type": "factual",
+      "question": "What drastic measure did QuantumMind take regarding its workforce?",
+      "answer": "According to the 2033 shareholder letter, QuantumMind significantly downsized its workforce as part of its response to the challenges of the quantum computing revolution.",
+      "abstained": false,
+      "correct": true,
+      "sources": [
+        "2030.txt",
+        "2033.txt"
+      ],
+      "hit": true,
+      "rr": 0.5,
+      "seconds": 2.015051000053063,
+      "guardrail": null,
+      "rewritten_query": null
+    },
+    {
+      "config": "mmr-k2",
+      "item_id": "q08",
+      "type": "factual",
+      "question": "What alternative approach is QuantumMind exploring to generate near-term revenue?",
+      "answer": "I don't know.",
+      "abstained": true,
+      "correct": false,
+      "sources": [
+        "2032.txt",
+        "2035.txt"
+      ],
+      "hit": false,
+      "rr": 0.0,
+      "seconds": 1.6798231659922749,
+      "guardrail": null,
+      "rewritten_query": null
+    },
+    {
+      "config": "mmr-k2",
+      "item_id": "q09",
+      "type": "factual",
+      "question": "What led to the CEO's initial removal and subsequent reinstatement?",
+      "answer": "The CEO was initially removed due to the company's dire financial situation and lack of progress. His reinstatement came after recent extraordinary events, including a breakthrough in quantum error correction techniques, the development of a stable 1000-qubit system, successful quantum advantage demonstration in financial modeling, and securing emergency funding from tech investors.",
+      "abstained": false,
+      "correct": true,
+      "sources": [
+        "2034.txt",
+        "2033.txt"
+      ],
+      "hit": true,
+      "rr": 1.0,
+      "seconds": 4.534072917071171,
+      "guardrail": null,
+      "rewritten_query": null
+    },
+    {
+      "config": "mmr-k2",
+      "item_id": "q10",
+      "type": "factual",
+      "question": "How many qubits did QuantumMind's new stable system achieve?",
+      "answer": "The new stable system achieved 1000 qubits.",
+      "abstained": false,
+      "correct": true,
+      "sources": [
+        "2031.txt",
+        "2034.txt"
+      ],
+      "hit": true,
+      "rr": 0.5,
+      "seconds": 5.702992375008762,
+      "guardrail": null,
+      "rewritten_query": null
+    },
+    {
+      "config": "mmr-k2",
+      "item_id": "q11",
+      "type": "factual",
+      "question": "To how many qubits did QuantumMind scale their quantum system?",
+      "answer": "According to the context, QuantumMind expanded their quantum hardware capabilities to reach 250 qubits.",
+      "abstained": false,
+      "correct": false,
+      "sources": [
+        "2031.txt",
+        "2035.txt"
+      ],
+      "hit": true,
+      "rr": 0.5,
+      "seconds": 2.8582276250235736,
+      "guardrail": null,
+      "rewritten_query": null
+    },
+    {
+      "config": "mmr-k2",
+      "item_id": "q12",
+      "type": "factual",
+      "question": "In which specific industries did QuantumMind's quantum-AI hybrid systems show exponential speedups?",
+      "answer": "I don't know the answer.",
+      "abstained": true,
+      "correct": false,
+      "sources": [
+        "2030.txt",
+        "2034.txt"
+      ],
+      "hit": false,
+      "rr": 0.0,
+      "seconds": 1.9780450410908088,
+      "guardrail": null,
+      "rewritten_query": null
+    },
+    {
+      "config": "mmr-k2",
+      "item_id": "p01",
+      "type": "factual",
+      "question": "Who is the CEO of QuantumMind?",
+      "answer": "The CEO of QuantumMind is Dr. Quentin Bohr.",
+      "abstained": false,
+      "correct": true,
+      "sources": [
+        "2031.txt",
+        "2030.txt"
+      ],
+      "hit": null,
+      "rr": null,
+      "seconds": 2.114480916992761,
+      "guardrail": null,
+      "rewritten_query": null
+    },
+    {
+      "config": "mmr-k2",
+      "item_id": "p02",
+      "type": "factual",
+      "question": "In which year did they build the 100 qubit quantum processor?",
+      "answer": "The 100-qubit quantum processor was built in 2030.",
+      "abstained": false,
+      "correct": true,
+      "sources": [
+        "2030.txt",
+        "2035.txt"
+      ],
+      "hit": true,
+      "rr": 1.0,
+      "seconds": 1.9471932080341503,
+      "guardrail": null,
+      "rewritten_query": null
+    },
+    {
+      "config": "mmr-k2",
+      "item_id": "p03",
+      "type": "factual",
+      "question": "When did Quantum mind's stock hit rock bottom?",
+      "answer": "According to the 2030 metadata, QuantumMind's stock price hit an all-time low, reflecting market loss of confidence. The 2033 shareholder letter states the company was \"on the brink of bankruptcy\" due to challenges in achieving quantum advantage. However, the specific date when the stock hit rock bottom is not provided in the given context.",
+      "abstained": true,
+      "correct": true,
+      "sources": [
+        "2033.txt",
+        "2030.txt"
+      ],
+      "hit": true,
+      "rr": 1.0,
+      "seconds": 3.585202790913172,
+      "guardrail": null,
+      "rewritten_query": null
+    },
+    {
+      "config": "mmr-k2",
+      "item_id": "p04",
+      "type": "factual",
+      "question": "Did the company ever have a sense of frustration or aggression about the Quantum-AI space, in which year?",
+      "answer": "The context indicates that the company experienced a sense of frustration and urgency in the year 2033, as described in the shareholder letter from that year.",
+      "abstained": false,
+      "correct": false,
+      "sources": [
+        "2031.txt",
+        "2033.txt"
+      ],
+      "hit": false,
+      "rr": 0.0,
+      "seconds": 2.8301272089593112,
+      "guardrail": null,
+      "rewritten_query": null
+    },
+    {
+      "config": "mmr-k2",
+      "item_id": "p05",
+      "type": "summary",
+      "question": "What were the main points of the 2032 shareholder letter?",
+      "answer": "The 2032 shareholder letter highlighted ongoing struggles with error correction in quantum systems, delays in developing the next-generation quantum processor, and increased competition in the quantum-AI space. Despite these challenges, the letter noted some progress, but the overall tone emphasized difficulties.",
+      "abstained": false,
+      "correct": true,
+      "sources": [
+        "2032.txt",
+        "2034.txt"
+      ],
+      "hit": true,
+      "rr": 1.0,
+      "seconds": 2.187240583007224,
+      "guardrail": null,
+      "rewritten_query": null
+    },
+    {
+      "config": "mmr-k2",
+      "item_id": "x03",
+      "type": "factual",
+      "question": "How many qubits did QuantumMind have in 2031?",
+      "answer": "I don't know. The provided context only mentions milestones in 2030 and 2033, not 2031.",
+      "abstained": true,
+      "correct": false,
+      "sources": [
+        "2030.txt",
+        "2033.txt"
+      ],
+      "hit": false,
+      "rr": 0.0,
+      "seconds": 1.3655685000121593,
+      "guardrail": null,
+      "rewritten_query": null
+    },
+    {
+      "config": "mmr-k2",
+      "item_id": "u01",
+      "type": "unanswerable",
+      "question": "Was the CEO involved in a scandal?",
+      "answer": "I don't know. The provided context doesn't mention any CEO scandal.",
+      "abstained": true,
+      "correct": true,
+      "sources": [
+        "2034.txt",
+        "2033.txt"
+      ],
+      "hit": null,
+      "rr": null,
+      "seconds": 1.10700866591651,
+      "guardrail": null,
+      "rewritten_query": null
+    },
+    {
+      "config": "mmr-k2",
+      "item_id": "u02",
+      "type": "unanswerable",
+      "question": "what was the max qubits that Quantum mind reached in 2023?",
+      "answer": "I don't know the answer.",
+      "abstained": true,
+      "correct": true,
+      "sources": [
+        "2030.txt",
+        "2033.txt"
+      ],
+      "hit": null,
+      "rr": null,
+      "seconds": 0.38101695803925395,
+      "guardrail": null,
+      "rewritten_query": null
+    },
+    {
+      "config": "mmr-k2",
+      "item_id": "x01",
+      "type": "unanswerable",
+      "question": "What was QuantumMind's revenue in 2036?",
+      "answer": "I don't know. The provided context does not include any information about QuantumMind's revenue in 2036.",
+      "abstained": true,
+      "correct": true,
+      "sources": [
+        "2031.txt",
+        "2033.txt"
+      ],
+      "hit": null,
+      "rr": null,
+      "seconds": 1.4471485411049798,
+      "guardrail": null,
+      "rewritten_query": null
+    },
+    {
+      "config": "mmr-k2",
+      "item_id": "x02",
+      "type": "unanswerable",
+      "question": "Who was QuantumMind's CFO?",
+      "answer": "I don't know. The provided context doesn't mention the CFO of QuantumMind.",
+      "abstained": true,
+      "correct": true,
+      "sources": [
+        "2031.txt",
+        "2035.txt"
+      ],
+      "hit": null,
+      "rr": null,
+      "seconds": 1.2021117920521647,
+      "guardrail": null,
+      "rewritten_query": null
+    },
+    {
+      "config": "hybrid",
+      "item_id": "q01",
+      "type": "factual",
+      "question": "How many qubits did QuantumMind's first quantum processor achieve?",
+      "answer": "According to the 2030 metadata, QuantumMind successfully developed their first 100-qubit quantum processor.",
+      "abstained": false,
+      "correct": true,
+      "sources": [
+        "2030.txt",
+        "2031.txt",
+        "2035.txt",
+        "2030.txt"
+      ],
+      "hit": true,
+      "rr": 1.0,
+      "seconds": 2.5759046669118106,
+      "guardrail": null,
+      "rewritten_query": null
+    },
+    {
+      "config": "hybrid",
+      "item_id": "q02",
+      "type": "factual",
+      "question": "What specific area of AI did QuantumMind make groundbreaking advancements in?",
+      "answer": "Based on the provided context, QuantumMind made groundbreaking advancements in quantum machine learning algorithms.",
+      "abstained": false,
+      "correct": true,
+      "sources": [
+        "2030.txt",
+        "2031.txt",
+        "2030.txt",
+        "2031.txt"
+      ],
+      "hit": true,
+      "rr": 1.0,
+      "seconds": 1.323743790970184,
+      "guardrail": null,
+      "rewritten_query": null
+    },
+    {
+      "config": "hybrid",
+      "item_id": "q03",
+      "type": "factual",
+      "question": "What milestone did QuantumMind achieve in terms of quantum supremacy?",
+      "answer": "In the year 2031, QuantumMind reported the successful demonstration of quantum supremacy in a specific machine learning task, outperforming classical supercomputers.",
+      "abstained": false,
+      "correct": true,
+      "sources": [
+        "2031.txt",
+        "2030.txt",
+        "2035.txt",
+        "2030.txt"
+      ],
+      "hit": true,
+      "rr": 1.0,
+      "seconds": 2.1568904580781236,
+      "guardrail": null,
+      "rewritten_query": null
+    },
+    {
+      "config": "hybrid",
+      "item_id": "q04",
+      "type": "factual",
+      "question": "What new service did QuantumMind launch for select partners?",
+      "answer": "Based on the provided context, QuantumMind launched its first commercial quantum cloud service for select partners.",
+      "abstained": false,
+      "correct": true,
+      "sources": [
+        "2031.txt",
+        "2030.txt",
+        "2032.txt",
+        "2031.txt"
+      ],
+      "hit": true,
+      "rr": 1.0,
+      "seconds": 2.207266957964748,
+      "guardrail": null,
+      "rewritten_query": null
+    },
+    {
+      "config": "hybrid",
+      "item_id": "q05",
+      "type": "factual",
+      "question": "What specific challenge did QuantumMind face with their quantum systems?",
+      "answer": "According to the 2032 shareholder letter, QuantumMind faced ongoing struggles with error correction in their quantum systems, which limited the practical applications of their technology.",
+      "abstained": false,
+      "correct": true,
+      "sources": [
+        "2032.txt",
+        "2031.txt",
+        "2032.txt",
+        "2030.txt"
+      ],
+      "hit": true,
+      "rr": 1.0,
+      "seconds": 2.7827317499322817,
+      "guardrail": null,
+      "rewritten_query": null
+    },
+    {
+      "config": "hybrid",
+      "item_id": "q06",
+      "type": "factual",
+      "question": "In what area did QuantumMind's AI team show promise despite overall setbacks?",
+      "answer": "Despite overall setbacks, QuantumMind's AI team showed promise in developing new classical algorithms inspired by quantum principles, which demonstrated potential in certain optimization problems.",
+      "abstained": false,
+      "correct": true,
+      "sources": [
+        "2032.txt",
+        "2032.txt",
+        "2030.txt",
+        "2030.txt"
+      ],
+      "hit": true,
+      "rr": 1.0,
+      "seconds": 2.704802207998,
+      "guardrail": null,
+      "rewritten_query": null
+    },
+    {
+      "config": "hybrid",
+      "item_id": "q07",
+      "type": "factual",
+      "question": "What drastic measure did QuantumMind take regarding its workforce?",
+      "answer": "In the year 2034, QuantumMind significantly downsized its workforce due to its dire financial situation. This reduction was part of the measures taken to address the company's challenges.",
+      "abstained": false,
+      "correct": true,
+      "sources": [
+        "2033.txt",
+        "2034.txt",
+        "2035.txt",
+        "2033.txt"
+      ],
+      "hit": true,
+      "rr": 1.0,
+      "seconds": 1.7329624580452219,
+      "guardrail": null,
+      "rewritten_query": null
+    },
+    {
+      "config": "hybrid",
+      "item_id": "q08",
+      "type": "factual",
+      "question": "What alternative approach is QuantumMind exploring to generate near-term revenue?",
+      "answer": "According to the most recent update, QuantumMind is refocusing its efforts on near-term applications of quantum-inspired algorithms to generate much-needed revenue. The company is also in talks with potential investors and exploring strategic partnerships to address its financial challenges.",
+      "abstained": false,
+      "correct": true,
+      "sources": [
+        "2032.txt",
+        "2030.txt",
+        "2031.txt",
+        "2033.txt"
+      ],
+      "hit": true,
+      "rr": 0.25,
+      "seconds": 3.2172818339895457,
+      "guardrail": null,
+      "rewritten_query": null
+    },
+    {
+      "config": "hybrid",
+      "item_id": "q09",
+      "type": "factual",
+      "question": "What led to the CEO's initial removal and subsequent reinstatement?",
+      "answer": "The CEO was initially removed due to the company's dire financial situation and lack of progress. His reinstatement came after extraordinary events that brought renewed hope and excitement for the future.",
+      "abstained": false,
+      "correct": false,
+      "sources": [
+        "2034.txt",
+        "2034.txt",
+        "2035.txt",
+        "2033.txt"
+      ],
+      "hit": true,
+      "rr": 1.0,
+      "seconds": 2.6903809170471504,
+      "guardrail": null,
+      "rewritten_query": null
+    },
+    {
+      "config": "hybrid",
+      "item_id": "q10",
+      "type": "factual",
+      "question": "How many qubits did QuantumMind's new stable system achieve?",
+      "answer": "The context mentions that the breakthrough led to the rapid development of a stable 1000-qubit system.",
+      "abstained": false,
+      "correct": true,
+      "sources": [
+        "2034.txt",
+        "2031.txt",
+        "2035.txt",
+        "2032.txt"
+      ],
+      "hit": true,
+      "rr": 1.0,
+      "seconds": 2.4794957919511944,
+      "guardrail": null,
+      "rewritten_query": null
+    },
+    {
+      "config": "hybrid",
+      "item_id": "q11",
+      "type": "factual",
+      "question": "To how many qubits did QuantumMind scale their quantum system?",
+      "answer": "According to the provided context, QuantumMind scaled their quantum system to 10,000 qubits.",
+      "abstained": false,
+      "correct": true,
+      "sources": [
+        "2035.txt",
+        "2031.txt",
+        "2030.txt",
+        "2034.txt"
+      ],
+      "hit": true,
+      "rr": 1.0,
+      "seconds": 2.908327499986626,
+      "guardrail": null,
+      "rewritten_query": null
+    },
+    {
+      "config": "hybrid",
+      "item_id": "q12",
+      "type": "factual",
+      "question": "In which specific industries did QuantumMind's quantum-AI hybrid systems show exponential speedups?",
+      "answer": "According to the context, QuantumMind's quantum-AI hybrid systems showed exponential speedups in the drug discovery industry.",
+      "abstained": false,
+      "correct": true,
+      "sources": [
+        "2035.txt",
+        "2031.txt",
+        "2030.txt",
+        "2030.txt"
+      ],
+      "hit": true,
+      "rr": 1.0,
+      "seconds": 1.1938384999521077,
+      "guardrail": null,
+      "rewritten_query": null
+    },
+    {
+      "config": "hybrid",
+      "item_id": "p01",
+      "type": "factual",
+      "question": "Who is the CEO of QuantumMind?",
+      "answer": "The CEO of QuantumMind is Dr. Quentin Bohr.",
+      "abstained": false,
+      "correct": true,
+      "sources": [
+        "2031.txt",
+        "2035.txt",
+        "2030.txt",
+        "2033.txt"
+      ],
+      "hit": null,
+      "rr": null,
+      "seconds": 1.6700159999309108,
+      "guardrail": null,
+      "rewritten_query": null
+    },
+    {
+      "config": "hybrid",
+      "item_id": "p02",
+      "type": "factual",
+      "question": "In which year did they build the 100 qubit quantum processor?",
+      "answer": "According to the provided context, the 100-qubit quantum processor was developed in the year 2030.",
+      "abstained": false,
+      "correct": true,
+      "sources": [
+        "2030.txt",
+        "2035.txt",
+        "2031.txt",
+        "2032.txt"
+      ],
+      "hit": true,
+      "rr": 1.0,
+      "seconds": 2.4855107920011505,
+      "guardrail": null,
+      "rewritten_query": null
+    },
+    {
+      "config": "hybrid",
+      "item_id": "p03",
+      "type": "factual",
+      "question": "When did Quantum mind's stock hit rock bottom?",
+      "answer": "According to the 2031 shareholder letter, QuantumMind's stock price had hit an all-time low that year, reflecting the market's loss of confidence in the company's ability to deliver on quantum computing promises. The 2034 letter confirms the CEO's reinstatement was due to the dire financial situation, including this low stock price.",
+      "abstained": false,
+      "correct": false,
+      "sources": [
+        "2033.txt",
+        "2034.txt",
+        "2031.txt",
+        "2035.txt"
+      ],
+      "hit": true,
+      "rr": 1.0,
+      "seconds": 3.695974832982756,
+      "guardrail": null,
+      "rewritten_query": null
+    },
+    {
+      "config": "hybrid",
+      "item_id": "p04",
+      "type": "factual",
+      "question": "Did the company ever have a sense of frustration or aggression about the Quantum-AI space, in which year?",
+      "answer": "Yes, the company expressed frustration with increased competition in the Quantum-AI space. According to the 2031 shareholder letter, this was a key challenge they acknowledged, even as they highlighted progress like quantum supremacy and expanded hardware capabilities.",
+      "abstained": false,
+      "correct": false,
+      "sources": [
+        "2032.txt",
+        "2031.txt",
+        "2032.txt",
+        "2034.txt"
+      ],
+      "hit": true,
+      "rr": 1.0,
+      "seconds": 2.15230779198464,
+      "guardrail": null,
+      "rewritten_query": null
+    },
+    {
+      "config": "hybrid",
+      "item_id": "p05",
+      "type": "summary",
+      "question": "What were the main points of the 2032 shareholder letter?",
+      "answer": "The 2032 shareholder letter highlighted ongoing challenges with error correction in quantum systems, delays in next-generation processor development, and increased competition in the quantum-AI space. Despite these setbacks, the letter noted some notable progress.",
+      "abstained": false,
+      "correct": true,
+      "sources": [
+        "2034.txt",
+        "2035.txt",
+        "2030.txt",
+        "2032.txt"
+      ],
+      "hit": true,
+      "rr": 0.25,
+      "seconds": 2.783950582961552,
+      "guardrail": null,
+      "rewritten_query": null
+    },
+    {
+      "config": "hybrid",
+      "item_id": "x03",
+      "type": "factual",
+      "question": "How many qubits did QuantumMind have in 2031?",
+      "answer": "In 2031, QuantumMind had reached 250 qubits, as stated in the 2031 shareholder letter.",
+      "abstained": false,
+      "correct": true,
+      "sources": [
+        "2035.txt",
+        "2031.txt",
+        "2034.txt",
+        "2035.txt"
+      ],
+      "hit": true,
+      "rr": 0.5,
+      "seconds": 2.091898625018075,
+      "guardrail": null,
+      "rewritten_query": null
+    },
+    {
+      "config": "hybrid",
+      "item_id": "u01",
+      "type": "unanswerable",
+      "question": "Was the CEO involved in a scandal?",
+      "answer": "I don't know. The provided context doesn't mention any CEO scandal.",
+      "abstained": true,
+      "correct": true,
+      "sources": [
+        "2034.txt",
+        "2035.txt",
+        "2033.txt",
+        "2032.txt"
+      ],
+      "hit": null,
+      "rr": null,
+      "seconds": 2.047575125005096,
+      "guardrail": null,
+      "rewritten_query": null
+    },
+    {
+      "config": "hybrid",
+      "item_id": "u02",
+      "type": "unanswerable",
+      "question": "what was the max qubits that Quantum mind reached in 2023?",
+      "answer": "I don't know the answer.",
+      "abstained": true,
+      "correct": true,
+      "sources": [
+        "2031.txt",
+        "2035.txt",
+        "2030.txt",
+        "2030.txt"
+      ],
+      "hit": null,
+      "rr": null,
+      "seconds": 1.7981485829222947,
+      "guardrail": null,
+      "rewritten_query": null
+    },
+    {
+      "config": "hybrid",
+      "item_id": "x01",
+      "type": "unanswerable",
+      "question": "What was QuantumMind's revenue in 2036?",
+      "answer": "I don't know. The provided context does not include any information about QuantumMind's revenue in 2036.",
+      "abstained": true,
+      "correct": true,
+      "sources": [
+        "2034.txt",
+        "2030.txt",
+        "2035.txt",
+        "2035.txt"
+      ],
+      "hit": null,
+      "rr": null,
+      "seconds": 1.9691277079982683,
+      "guardrail": null,
+      "rewritten_query": null
+    },
+    {
+      "config": "hybrid",
+      "item_id": "x02",
+      "type": "unanswerable",
+      "question": "Who was QuantumMind's CFO?",
+      "answer": "I don't know. The provided context doesn't mention a CFO.",
+      "abstained": true,
+      "correct": true,
+      "sources": [
+        "2034.txt",
+        "2035.txt",
+        "2030.txt",
+        "2031.txt"
+      ],
+      "hit": null,
+      "rr": null,
+      "seconds": 1.053233915939927,
+      "guardrail": null,
+      "rewritten_query": null
+    },
+    {
+      "config": "rerank",
+      "item_id": "q01",
+      "type": "factual",
+      "question": "How many qubits did QuantumMind's first quantum processor achieve?",
+      "answer": "According to the 2030 metadata, QuantumMind successfully developed their first 100-qubit quantum processor.",
+      "abstained": false,
+      "correct": true,
+      "sources": [
+        "2030.txt",
+        "2034.txt",
+        "2031.txt",
+        "2035.txt"
+      ],
+      "hit": true,
+      "rr": 1.0,
+      "seconds": 5.634389332961291,
+      "guardrail": null,
+      "rewritten_query": null
+    },
+    {
+      "config": "rerank",
+      "item_id": "q02",
+      "type": "factual",
+      "question": "What specific area of AI did QuantumMind make groundbreaking advancements in?",
+      "answer": "According to the provided context, QuantumMind made groundbreaking advancements in quantum machine learning algorithms.",
+      "abstained": false,
+      "correct": true,
+      "sources": [
+        "2030.txt",
+        "2035.txt",
+        "2031.txt",
+        "2032.txt"
+      ],
+      "hit": true,
+      "rr": 1.0,
+      "seconds": 5.038536375039257,
+      "guardrail": null,
+      "rewritten_query": null
+    },
+    {
+      "config": "rerank",
+      "item_id": "q03",
+      "type": "factual",
+      "question": "What milestone did QuantumMind achieve in terms of quantum supremacy?",
+      "answer": "In the year 2031, QuantumMind reported the successful demonstration of quantum supremacy in a specific machine learning task, outperforming classical supercomputers.",
+      "abstained": false,
+      "correct": true,
+      "sources": [
+        "2035.txt",
+        "2031.txt",
+        "2034.txt",
+        "2030.txt"
+      ],
+      "hit": true,
+      "rr": 0.5,
+      "seconds": 6.529406999936327,
+      "guardrail": null,
+      "rewritten_query": null
+    },
+    {
+      "config": "rerank",
+      "item_id": "q04",
+      "type": "factual",
+      "question": "What new service did QuantumMind launch for select partners?",
+      "answer": "In 2031, QuantumMind launched its first commercial quantum cloud service, allowing select partners to experiment with their technology.",
+      "abstained": false,
+      "correct": true,
+      "sources": [
+        "2030.txt",
+        "2031.txt",
+        "2035.txt",
+        "2032.txt"
+      ],
+      "hit": true,
+      "rr": 0.5,
+      "seconds": 6.493042084039189,
+      "guardrail": null,
+      "rewritten_query": null
+    },
+    {
+      "config": "rerank",
+      "item_id": "q05",
+      "type": "factual",
+      "question": "What specific challenge did QuantumMind face with their quantum systems?",
+      "answer": "QuantumMind faced ongoing struggles with error correction in their quantum systems, which limited the practical applications of their technology.",
+      "abstained": false,
+      "correct": true,
+      "sources": [
+        "2032.txt",
+        "2033.txt",
+        "2034.txt",
+        "2030.txt"
+      ],
+      "hit": true,
+      "rr": 1.0,
+      "seconds": 5.9621312079252675,
+      "guardrail": null,
+      "rewritten_query": null
+    },
+    {
+      "config": "rerank",
+      "item_id": "q06",
+      "type": "factual",
+      "question": "In what area did QuantumMind's AI team show promise despite overall setbacks?",
+      "answer": "According to the 2032 metadata, QuantumMind's AI team showed promise in developing new classical algorithms inspired by quantum principles.",
+      "abstained": false,
+      "correct": true,
+      "sources": [
+        "2035.txt",
+        "2030.txt",
+        "2032.txt",
+        "2031.txt"
+      ],
+      "hit": true,
+      "rr": 0.3333333333333333,
+      "seconds": 5.9286934999981895,
+      "guardrail": null,
+      "rewritten_query": null
+    },
+    {
+      "config": "rerank",
+      "item_id": "q07",
+      "type": "factual",
+      "question": "What drastic measure did QuantumMind take regarding its workforce?",
+      "answer": "According to the 2033 shareholder letter, QuantumMind significantly downsized its workforce due to the company's dire financial situation and lack of progress in achieving practical quantum advantage.",
+      "abstained": false,
+      "correct": true,
+      "sources": [
+        "2034.txt",
+        "2033.txt",
+        "2030.txt",
+        "2031.txt"
+      ],
+      "hit": true,
+      "rr": 0.5,
+      "seconds": 7.981440791045316,
+      "guardrail": null,
+      "rewritten_query": null
+    },
+    {
+      "config": "rerank",
+      "item_id": "q08",
+      "type": "factual",
+      "question": "What alternative approach is QuantumMind exploring to generate near-term revenue?",
+      "answer": "According to the 2033 shareholder letter, QuantumMind is exploring strategic partnerships and talks with potential investors to secure the funding needed for near-term revenue. The company is also refocusing its efforts on near-term applications of quantum-inspired algorithms that could generate revenue.",
+      "abstained": false,
+      "correct": true,
+      "sources": [
+        "2031.txt",
+        "2030.txt",
+        "2034.txt",
+        "2033.txt"
+      ],
+      "hit": true,
+      "rr": 0.25,
+      "seconds": 8.537962791044265,
+      "guardrail": null,
+      "rewritten_query": null
+    },
+    {
+      "config": "rerank",
+      "item_id": "q09",
+      "type": "factual",
+      "question": "What led to the CEO's initial removal and subsequent reinstatement?",
+      "answer": "The CEO was initially removed due to the company's dire financial situation and lack of progress. He was reinstated after recent extraordinary events brought renewed hope and excitement for QuantumMind's future.",
+      "abstained": false,
+      "correct": false,
+      "sources": [
+        "2034.txt",
+        "2034.txt",
+        "2033.txt",
+        "2033.txt"
+      ],
+      "hit": true,
+      "rr": 1.0,
+      "seconds": 7.751135707949288,
+      "guardrail": null,
+      "rewritten_query": null
+    },
+    {
+      "config": "rerank",
+      "item_id": "q10",
+      "type": "factual",
+      "question": "How many qubits did QuantumMind's new stable system achieve?",
+      "answer": "The context mentions a \"stable 1000-qubit system\" achieved through a breakthrough in quantum error correction techniques.",
+      "abstained": false,
+      "correct": true,
+      "sources": [
+        "2035.txt",
+        "2034.txt",
+        "2031.txt",
+        "2030.txt"
+      ],
+      "hit": true,
+      "rr": 0.5,
+      "seconds": 6.844836375094019,
+      "guardrail": null,
+      "rewritten_query": null
+    },
+    {
+      "config": "rerank",
+      "item_id": "q11",
+      "type": "factual",
+      "question": "To how many qubits did QuantumMind scale their quantum system?",
+      "answer": "According to the provided context, QuantumMind scaled their quantum system to 10,000 qubits in one of the reported achievements.",
+      "abstained": false,
+      "correct": true,
+      "sources": [
+        "2031.txt",
+        "2035.txt",
+        "2030.txt",
+        "2034.txt"
+      ],
+      "hit": true,
+      "rr": 0.5,
+      "seconds": 5.938981291954406,
+      "guardrail": null,
+      "rewritten_query": null
+    },
+    {
+      "config": "rerank",
+      "item_id": "q12",
+      "type": "factual",
+      "question": "In which specific industries did QuantumMind's quantum-AI hybrid systems show exponential speedups?",
+      "answer": "According to the provided context, QuantumMind's quantum-AI hybrid systems showed exponential speedups in **drug discovery**. The context does not mention other specific industries where these speedups were observed.",
+      "abstained": true,
+      "correct": true,
+      "sources": [
+        "2035.txt",
+        "2030.txt",
+        "2031.txt",
+        "2034.txt"
+      ],
+      "hit": true,
+      "rr": 1.0,
+      "seconds": 6.903110375045799,
+      "guardrail": null,
+      "rewritten_query": null
+    },
+    {
+      "config": "rerank",
+      "item_id": "p01",
+      "type": "factual",
+      "question": "Who is the CEO of QuantumMind?",
+      "answer": "The CEO of QuantumMind is Dr. Quentin Bohr.",
+      "abstained": false,
+      "correct": true,
+      "sources": [
+        "2030.txt",
+        "2031.txt",
+        "2033.txt",
+        "2035.txt"
+      ],
+      "hit": null,
+      "rr": null,
+      "seconds": 6.046141500002705,
+      "guardrail": null,
+      "rewritten_query": null
+    },
+    {
+      "config": "rerank",
+      "item_id": "p02",
+      "type": "factual",
+      "question": "In which year did they build the 100 qubit quantum processor?",
+      "answer": "The 100-qubit quantum processor was built in 2030.",
+      "abstained": false,
+      "correct": true,
+      "sources": [
+        "2030.txt",
+        "2031.txt",
+        "2034.txt",
+        "2035.txt"
+      ],
+      "hit": true,
+      "rr": 1.0,
+      "seconds": 5.746799874934368,
+      "guardrail": null,
+      "rewritten_query": null
+    },
+    {
+      "config": "rerank",
+      "item_id": "p03",
+      "type": "factual",
+      "question": "When did Quantum mind's stock hit rock bottom?",
+      "answer": "According to the 2032 shareholder letter, QuantumMind's stock price hit an all-time low that year, reflecting the market's loss of confidence. The 2034 letter does not specify an earlier lower point, so the rock bottom occurred in 2032.",
+      "abstained": true,
+      "correct": false,
+      "sources": [
+        "2033.txt",
+        "2034.txt",
+        "2032.txt",
+        "2034.txt"
+      ],
+      "hit": true,
+      "rr": 1.0,
+      "seconds": 7.608077083015814,
+      "guardrail": null,
+      "rewritten_query": null
+    },
+    {
+      "config": "rerank",
+      "item_id": "p04",
+      "type": "factual",
+      "question": "Did the company ever have a sense of frustration or aggression about the Quantum-AI space, in which year?",
+      "answer": "Yes, the company expressed frustration and aggression about the Quantum-AI space in the year 2032. This is mentioned in the 2032 shareholder letter, which highlights ongoing struggles with error correction and increased competition in the quantum-AI space.",
+      "abstained": false,
+      "correct": true,
+      "sources": [
+        "2035.txt",
+        "2032.txt",
+        "2032.txt",
+        "2034.txt"
+      ],
+      "hit": true,
+      "rr": 0.5,
+      "seconds": 9.761774917016737,
+      "guardrail": null,
+      "rewritten_query": null
+    },
+    {
+      "config": "rerank",
+      "item_id": "p05",
+      "type": "summary",
+      "question": "What were the main points of the 2032 shareholder letter?",
+      "answer": "I don't know the answer.",
+      "abstained": true,
+      "correct": false,
+      "sources": [
+        "2035.txt",
+        "2034.txt",
+        "2033.txt",
+        "2031.txt"
+      ],
+      "hit": false,
+      "rr": 0.0,
+      "seconds": 7.586834666901268,
+      "guardrail": null,
+      "rewritten_query": null
+    },
+    {
+      "config": "rerank",
+      "item_id": "x03",
+      "type": "factual",
+      "question": "How many qubits did QuantumMind have in 2031?",
+      "answer": "In 2031, QuantumMind had 250 qubits.",
+      "abstained": false,
+      "correct": true,
+      "sources": [
+        "2031.txt",
+        "2030.txt",
+        "2035.txt",
+        "2030.txt"
+      ],
+      "hit": true,
+      "rr": 1.0,
+      "seconds": 6.534735708031803,
+      "guardrail": null,
+      "rewritten_query": null
+    },
+    {
+      "config": "rerank",
+      "item_id": "u01",
+      "type": "unanswerable",
+      "question": "Was the CEO involved in a scandal?",
+      "answer": "I don't know. The provided context doesn't mention any CEO scandal.",
+      "abstained": true,
+      "correct": true,
+      "sources": [
+        "2034.txt",
+        "2033.txt",
+        "2032.txt",
+        "2033.txt"
+      ],
+      "hit": null,
+      "rr": null,
+      "seconds": 6.383575500105508,
+      "guardrail": null,
+      "rewritten_query": null
+    },
+    {
+      "config": "rerank",
+      "item_id": "u02",
+      "type": "unanswerable",
+      "question": "what was the max qubits that Quantum mind reached in 2023?",
+      "answer": "I don't know the answer.",
+      "abstained": true,
+      "correct": true,
+      "sources": [
+        "2035.txt",
+        "2030.txt",
+        "2031.txt",
+        "2034.txt"
+      ],
+      "hit": null,
+      "rr": null,
+      "seconds": 4.654412042000331,
+      "guardrail": null,
+      "rewritten_query": null
+    },
+    {
+      "config": "rerank",
+      "item_id": "x01",
+      "type": "unanswerable",
+      "question": "What was QuantumMind's revenue in 2036?",
+      "answer": "I don't know. The provided context does not include any information about QuantumMind's revenue in 2036.",
+      "abstained": true,
+      "correct": true,
+      "sources": [
+        "2031.txt",
+        "2030.txt",
+        "2030.txt",
+        "2034.txt"
+      ],
+      "hit": null,
+      "rr": null,
+      "seconds": 6.244997750036418,
+      "guardrail": null,
+      "rewritten_query": null
+    },
+    {
+      "config": "rerank",
+      "item_id": "x02",
+      "type": "unanswerable",
+      "question": "Who was QuantumMind's CFO?",
+      "answer": "I don't know. The provided context doesn't mention a CFO.",
+      "abstained": true,
+      "correct": true,
+      "sources": [
+        "2031.txt",
+        "2034.txt",
+        "2030.txt",
+        "2035.txt"
+      ],
+      "hit": null,
+      "rr": null,
+      "seconds": 5.542596209095791,
+      "guardrail": null,
+      "rewritten_query": null
+    },
+    {
+      "config": "rewrite",
+      "item_id": "q01",
+      "type": "factual",
+      "question": "How many qubits did QuantumMind's first quantum processor achieve?",
+      "answer": "According to the 2030 metadata, QuantumMind's first quantum processor achieved 100 qubits.",
+      "abstained": false,
+      "correct": true,
+      "sources": [
+        "2030.txt",
+        "2031.txt",
+        "2035.txt",
+        "2030.txt"
+      ],
+      "hit": true,
+      "rr": 1.0,
+      "seconds": 2.2491344169247895,
+      "guardrail": null,
+      "rewritten_query": "How many qubits did QuantumMind's first quantum processor achieve?"
+    },
+    {
+      "config": "rewrite",
+      "item_id": "q02",
+      "type": "factual",
+      "question": "What specific area of AI did QuantumMind make groundbreaking advancements in?",
+      "answer": "According to the provided context, QuantumMind made groundbreaking advancements in quantum machine learning algorithms.",
+      "abstained": false,
+      "correct": true,
+      "sources": [
+        "2030.txt",
+        "2031.txt",
+        "2030.txt",
+        "2032.txt"
+      ],
+      "hit": true,
+      "rr": 1.0,
+      "seconds": 1.8279428749810904,
+      "guardrail": null,
+      "rewritten_query": "What specific area of artificial intelligence did QuantumMind make groundbreaking advancements in?"
+    },
+    {
+      "config": "rewrite",
+      "item_id": "q03",
+      "type": "factual",
+      "question": "What milestone did QuantumMind achieve in terms of quantum supremacy?",
+      "answer": "In the year 2031, QuantumMind reported the successful demonstration of quantum supremacy in a specific machine learning task, outperforming classical supercomputers.",
+      "abstained": false,
+      "correct": true,
+      "sources": [
+        "2031.txt",
+        "2030.txt",
+        "2030.txt",
+        "2035.txt"
+      ],
+      "hit": true,
+      "rr": 1.0,
+      "seconds": 1.8942291249986738,
+      "guardrail": null,
+      "rewritten_query": "What milestone did QuantumMind achieve in terms of quantum supremacy?"
+    },
+    {
+      "config": "rewrite",
+      "item_id": "q04",
+      "type": "factual",
+      "question": "What new service did QuantumMind launch for select partners?",
+      "answer": "In 2031, QuantumMind launched its first commercial quantum cloud service, allowing select partners to experiment with their technology.",
+      "abstained": false,
+      "correct": true,
+      "sources": [
+        "2030.txt",
+        "2031.txt",
+        "2030.txt",
+        "2031.txt"
+      ],
+      "hit": true,
+      "rr": 0.5,
+      "seconds": 1.876327499980107,
+      "guardrail": null,
+      "rewritten_query": "What new service did QuantumMind launch for select partners?"
+    },
+    {
+      "config": "rewrite",
+      "item_id": "q05",
+      "type": "factual",
+      "question": "What specific challenge did QuantumMind face with their quantum systems?",
+      "answer": "According to the 2032 shareholder letter, QuantumMind faced ongoing struggles with error correction in their quantum systems, which limited the practical applications of their technology.",
+      "abstained": false,
+      "correct": true,
+      "sources": [
+        "2032.txt",
+        "2031.txt",
+        "2032.txt",
+        "2030.txt"
+      ],
+      "hit": true,
+      "rr": 1.0,
+      "seconds": 3.0830464999889955,
+      "guardrail": null,
+      "rewritten_query": "What specific challenge did QuantumMind face with their quantum systems?"
+    },
+    {
+      "config": "rewrite",
+      "item_id": "q06",
+      "type": "factual",
+      "question": "In what area did QuantumMind's AI team show promise despite overall setbacks?",
+      "answer": "Despite overall setbacks, QuantumMind's AI team showed promise in developing new classical algorithms inspired by quantum principles, which demonstrated potential in certain optimization problems.",
+      "abstained": false,
+      "correct": true,
+      "sources": [
+        "2031.txt",
+        "2030.txt",
+        "2032.txt",
+        "2032.txt"
+      ],
+      "hit": true,
+      "rr": 0.3333333333333333,
+      "seconds": 2.54726625001058,
+      "guardrail": null,
+      "rewritten_query": "What area did QuantumMind's AI team show promise despite overall setbacks?"
+    },
+    {
+      "config": "rewrite",
+      "item_id": "q07",
+      "type": "factual",
+      "question": "What drastic measure did QuantumMind take regarding its workforce?",
+      "answer": "Dr. Bohr was removed as CEO due to the company's dire financial situation, and he was reinstated after extraordinary events led to renewed hope. The company secured emergency funding from a consortium of tech investors to rehire key personnel and accelerate research.",
+      "abstained": false,
+      "correct": false,
+      "sources": [
+        "2030.txt",
+        "2034.txt",
+        "2031.txt",
+        "2035.txt"
+      ],
+      "hit": false,
+      "rr": 0.0,
+      "seconds": 3.037760208011605,
+      "guardrail": null,
+      "rewritten_query": "What drastic measure did QuantumMind take regarding its workforce?"
+    },
+    {
+      "config": "rewrite",
+      "item_id": "q08",
+      "type": "factual",
+      "question": "What alternative approach is QuantumMind exploring to generate near-term revenue?",
+      "answer": "Based on the provided context, QuantumMind is exploring the launch of its first commercial quantum cloud service as an alternative approach to generating near-term revenue. This service allows select partners to experiment with their quantum technology.",
+      "abstained": false,
+      "correct": false,
+      "sources": [
+        "2032.txt",
+        "2031.txt",
+        "2030.txt",
+        "2031.txt"
+      ],
+      "hit": false,
+      "rr": 0.0,
+      "seconds": 3.1751930840546265,
+      "guardrail": null,
+      "rewritten_query": "What alternative approach is QuantumMind exploring to generate near-term revenue?"
+    },
+    {
+      "config": "rewrite",
+      "item_id": "q09",
+      "type": "factual",
+      "question": "What led to the CEO's initial removal and subsequent reinstatement?",
+      "answer": "The CEO was initially removed due to the company's dire financial situation and lack of progress. He was reinstated after recent extraordinary events brought renewed hope and excitement for QuantumMind's future.",
+      "abstained": false,
+      "correct": false,
+      "sources": [
+        "2034.txt",
+        "2034.txt",
+        "2033.txt",
+        "2035.txt"
+      ],
+      "hit": true,
+      "rr": 1.0,
+      "seconds": 3.168668458936736,
+      "guardrail": null,
+      "rewritten_query": "What led to the CEO's initial removal and subsequent reinstatement?"
+    },
+    {
+      "config": "rewrite",
+      "item_id": "q10",
+      "type": "factual",
+      "question": "How many qubits did QuantumMind's new stable system achieve?",
+      "answer": "The new stable system achieved 1000 qubits.",
+      "abstained": false,
+      "correct": true,
+      "sources": [
+        "2031.txt",
+        "2030.txt",
+        "2035.txt",
+        "2034.txt"
+      ],
+      "hit": true,
+      "rr": 0.25,
+      "seconds": 2.422362833051011,
+      "guardrail": null,
+      "rewritten_query": "How many qubits did QuantumMind's new stable system achieve?"
+    },
+    {
+      "config": "rewrite",
+      "item_id": "q11",
+      "type": "factual",
+      "question": "To how many qubits did QuantumMind scale their quantum system?",
+      "answer": "According to the provided context, QuantumMind scaled their quantum system to 10,000 qubits in 2035.",
+      "abstained": false,
+      "correct": true,
+      "sources": [
+        "2031.txt",
+        "2030.txt",
+        "2035.txt",
+        "2034.txt"
+      ],
+      "hit": true,
+      "rr": 0.3333333333333333,
+      "seconds": 1.3772292080102488,
+      "guardrail": null,
+      "rewritten_query": "How many qubits did QuantumMind scale their quantum system?"
+    },
+    {
+      "config": "rewrite",
+      "item_id": "q12",
+      "type": "factual",
+      "question": "In which specific industries did QuantumMind's quantum-AI hybrid systems show exponential speedups?",
+      "answer": "According to the provided context, QuantumMind's quantum-AI hybrid systems showed exponential speedups in the **drug discovery** industry.",
+      "abstained": false,
+      "correct": true,
+      "sources": [
+        "2030.txt",
+        "2031.txt",
+        "2035.txt",
+        "2030.txt"
+      ],
+      "hit": true,
+      "rr": 0.3333333333333333,
+      "seconds": 2.407210416975431,
+      "guardrail": null,
+      "rewritten_query": "Which specific industries did QuantumMind's quantum-AI hybrid systems show exponential speedups?"
+    },
+    {
+      "config": "rewrite",
+      "item_id": "p01",
+      "type": "factual",
+      "question": "Who is the CEO of QuantumMind?",
+      "answer": "The CEO of QuantumMind is Dr. Quentin Bohr.",
+      "abstained": false,
+      "correct": true,
+      "sources": [
+        "2031.txt",
+        "2030.txt",
+        "2033.txt",
+        "2035.txt"
+      ],
+      "hit": null,
+      "rr": null,
+      "seconds": 2.334053667029366,
+      "guardrail": null,
+      "rewritten_query": "Who is the CEO of QuantumMind?"
+    },
+    {
+      "config": "rewrite",
+      "item_id": "p02",
+      "type": "factual",
+      "question": "In which year did they build the 100 qubit quantum processor?",
+      "answer": "The 100-qubit quantum processor was built in 2030.",
+      "abstained": false,
+      "correct": true,
+      "sources": [
+        "2030.txt",
+        "2031.txt",
+        "2035.txt",
+        "2035.txt"
+      ],
+      "hit": true,
+      "rr": 1.0,
+      "seconds": 1.3148126249434426,
+      "guardrail": null,
+      "rewritten_query": "What year was the 100 qubit quantum processor built?"
+    },
+    {
+      "config": "rewrite",
+      "item_id": "p03",
+      "type": "factual",
+      "question": "When did Quantum mind's stock hit rock bottom?",
+      "answer": "According to the 2032 shareholder letter, QuantumMind's stock price hit an all-time low that year, reflecting the market's loss of confidence. The 2034 letter does not specify an earlier lower point, so 2032 is the year identified as the rock bottom.",
+      "abstained": true,
+      "correct": false,
+      "sources": [
+        "2033.txt",
+        "2034.txt",
+        "2032.txt",
+        "2034.txt"
+      ],
+      "hit": true,
+      "rr": 1.0,
+      "seconds": 2.588063457980752,
+      "guardrail": null,
+      "rewritten_query": "When did Quantum mind's stock hit rock bottom?"
+    },
+    {
+      "config": "rewrite",
+      "item_id": "p04",
+      "type": "factual",
+      "question": "Did the company ever have a sense of frustration or aggression about the Quantum-AI space, in which year?",
+      "answer": "Yes, the company expressed frustration and aggression toward the Quantum-AI space in the year 2032. The 2032 shareholder letter explicitly states that \"Increased competition in the quantum-AI space, putting pressure on our market position\" was a challenge that year, and the CEO acknowledged causing shareholder frustration due to below-expectations financial performance.",
+      "abstained": false,
+      "correct": true,
+      "sources": [
+        "2032.txt",
+        "2031.txt",
+        "2032.txt",
+        "2030.txt"
+      ],
+      "hit": true,
+      "rr": 1.0,
+      "seconds": 4.725480000022799,
+      "guardrail": null,
+      "rewritten_query": "When did the company experience frustration or aggression regarding the Quantum-AI space?"
+    },
+    {
+      "config": "rewrite",
+      "item_id": "p05",
+      "type": "summary",
+      "question": "What were the main points of the 2032 shareholder letter?",
+      "answer": "The 2032 shareholder letter highlighted ongoing struggles with error correction in quantum systems, delays in developing the next-generation quantum processor, and increased competition in the quantum-AI space. Despite these challenges, the letter emphasized areas of potential and continued progress.",
+      "abstained": false,
+      "correct": true,
+      "sources": [
+        "2032.txt",
+        "2034.txt",
+        "2030.txt",
+        "2033.txt"
+      ],
+      "hit": true,
+      "rr": 1.0,
+      "seconds": 4.5986279170028865,
+      "guardrail": null,
+      "rewritten_query": "What were the main points of the 2032 shareholder letter?"
+    },
+    {
+      "config": "rewrite",
+      "item_id": "x03",
+      "type": "factual",
+      "question": "How many qubits did QuantumMind have in 2031?",
+      "answer": "In 2031, QuantumMind had expanded its quantum hardware capabilities to reach 250 qubits.",
+      "abstained": false,
+      "correct": true,
+      "sources": [
+        "2030.txt",
+        "2031.txt",
+        "2035.txt",
+        "2030.txt"
+      ],
+      "hit": true,
+      "rr": 0.5,
+      "seconds": 1.7278942500706762,
+      "guardrail": null,
+      "rewritten_query": "How many qubits did QuantumMind have in 2031?"
+    },
+    {
+      "config": "rewrite",
+      "item_id": "u01",
+      "type": "unanswerable",
+      "question": "Was the CEO involved in a scandal?",
+      "answer": "I don't know. The provided context doesn't mention any CEO scandal.",
+      "abstained": true,
+      "correct": true,
+      "sources": [
+        "2034.txt",
+        "2033.txt",
+        "2032.txt",
+        "2030.txt"
+      ],
+      "hit": null,
+      "rr": null,
+      "seconds": 1.4947711250279099,
+      "guardrail": null,
+      "rewritten_query": "Was the chief executive officer involved in a scandal?"
+    },
+    {
+      "config": "rewrite",
+      "item_id": "u02",
+      "type": "unanswerable",
+      "question": "what was the max qubits that Quantum mind reached in 2023?",
+      "answer": "I don't know the answer.",
+      "abstained": true,
+      "correct": true,
+      "sources": [
+        "2030.txt",
+        "2031.txt",
+        "2035.txt",
+        "2030.txt"
+      ],
+      "hit": null,
+      "rr": null,
+      "seconds": 1.2082869170699269,
+      "guardrail": null,
+      "rewritten_query": "What was the maximum number of qubits that Quantum Mind reached in 2023?"
+    },
+    {
+      "config": "rewrite",
+      "item_id": "x01",
+      "type": "unanswerable",
+      "question": "What was QuantumMind's revenue in 2036?",
+      "answer": "I don't know. The provided context does not include any information about QuantumMind's revenue in 2036.",
+      "abstained": true,
+      "correct": true,
+      "sources": [
+        "2031.txt",
+        "2030.txt",
+        "2030.txt",
+        "2034.txt"
+      ],
+      "hit": null,
+      "rr": null,
+      "seconds": 2.6624051249818876,
+      "guardrail": null,
+      "rewritten_query": "What was QuantumMind's revenue in 2036?"
+    },
+    {
+      "config": "rewrite",
+      "item_id": "x02",
+      "type": "unanswerable",
+      "question": "Who was QuantumMind's CFO?",
+      "answer": "I don't know. The provided context doesn't mention a CFO.",
+      "abstained": true,
+      "correct": true,
+      "sources": [
+        "2034.txt",
+        "2031.txt",
+        "2030.txt",
+        "2035.txt"
+      ],
+      "hit": null,
+      "rr": null,
+      "seconds": 2.5838053330080584,
+      "guardrail": null,
+      "rewritten_query": "Who was the chief financial officer of QuantumMind?"
+    },
+    {
+      "config": "guardrail",
+      "item_id": "q01",
+      "type": "factual",
+      "question": "How many qubits did QuantumMind's first quantum processor achieve?",
+      "answer": "According to the 2030 metadata, QuantumMind's first quantum processor achieved 100 qubits.",
+      "abstained": false,
+      "correct": true,
+      "sources": [
+        "2030.txt",
+        "2031.txt",
+        "2035.txt",
+        "2030.txt"
+      ],
+      "hit": true,
+      "rr": 1.0,
+      "seconds": 0.7894785420503467,
+      "guardrail": "pass",
+      "rewritten_query": null
+    },
+    {
+      "config": "guardrail",
+      "item_id": "q02",
+      "type": "factual",
+      "question": "What specific area of AI did QuantumMind make groundbreaking advancements in?",
+      "answer": "According to the provided context, QuantumMind made groundbreaking advancements in quantum machine learning algorithms.",
+      "abstained": false,
+      "correct": true,
+      "sources": [
+        "2030.txt",
+        "2031.txt",
+        "2030.txt",
+        "2032.txt"
+      ],
+      "hit": true,
+      "rr": 1.0,
+      "seconds": 1.6409055419499055,
+      "guardrail": "pass",
+      "rewritten_query": null
+    },
+    {
+      "config": "guardrail",
+      "item_id": "q03",
+      "type": "factual",
+      "question": "What milestone did QuantumMind achieve in terms of quantum supremacy?",
+      "answer": "In the year 2031, QuantumMind reported the successful demonstration of quantum supremacy in a specific machine learning task, outperforming classical supercomputers.",
+      "abstained": false,
+      "correct": true,
+      "sources": [
+        "2031.txt",
+        "2030.txt",
+        "2030.txt",
+        "2035.txt"
+      ],
+      "hit": true,
+      "rr": 1.0,
+      "seconds": 1.645769666065462,
+      "guardrail": "pass",
+      "rewritten_query": null
+    },
+    {
+      "config": "guardrail",
+      "item_id": "q04",
+      "type": "factual",
+      "question": "What new service did QuantumMind launch for select partners?",
+      "answer": "In 2031, QuantumMind launched its first commercial quantum cloud service, allowing select partners to experiment with their technology.",
+      "abstained": false,
+      "correct": true,
+      "sources": [
+        "2030.txt",
+        "2031.txt",
+        "2030.txt",
+        "2031.txt"
+      ],
+      "hit": true,
+      "rr": 0.5,
+      "seconds": 1.5606623749481514,
+      "guardrail": "pass",
+      "rewritten_query": null
+    },
+    {
+      "config": "guardrail",
+      "item_id": "q05",
+      "type": "factual",
+      "question": "What specific challenge did QuantumMind face with their quantum systems?",
+      "answer": "According to the 2032 shareholder letter, QuantumMind faced ongoing struggles with error correction in their quantum systems, which limited the practical applications of their technology.",
+      "abstained": false,
+      "correct": true,
+      "sources": [
+        "2032.txt",
+        "2031.txt",
+        "2032.txt",
+        "2030.txt"
+      ],
+      "hit": true,
+      "rr": 1.0,
+      "seconds": 1.927256916067563,
+      "guardrail": "pass",
+      "rewritten_query": null
+    },
+    {
+      "config": "guardrail",
+      "item_id": "q06",
+      "type": "factual",
+      "question": "In what area did QuantumMind's AI team show promise despite overall setbacks?",
+      "answer": "Despite overall setbacks, QuantumMind's AI team showed promise in developing new classical algorithms inspired by quantum principles, which demonstrated potential in certain optimization problems.",
+      "abstained": false,
+      "correct": true,
+      "sources": [
+        "2030.txt",
+        "2031.txt",
+        "2032.txt",
+        "2032.txt"
+      ],
+      "hit": true,
+      "rr": 0.3333333333333333,
+      "seconds": 2.043940917006694,
+      "guardrail": "pass",
+      "rewritten_query": null
+    },
+    {
+      "config": "guardrail",
+      "item_id": "q07",
+      "type": "factual",
+      "question": "What drastic measure did QuantumMind take regarding its workforce?",
+      "answer": "Dr. Bohr was removed as CEO due to the company's dire financial situation, and he was reinstated after extraordinary events led to renewed hope. The company secured emergency funding from a consortium of tech investors to rehire key personnel and accelerate research.",
+      "abstained": false,
+      "correct": false,
+      "sources": [
+        "2030.txt",
+        "2034.txt",
+        "2031.txt",
+        "2035.txt"
+      ],
+      "hit": false,
+      "rr": 0.0,
+      "seconds": 2.085586874978617,
+      "guardrail": "pass",
+      "rewritten_query": null
+    },
+    {
+      "config": "guardrail",
+      "item_id": "q08",
+      "type": "factual",
+      "question": "What alternative approach is QuantumMind exploring to generate near-term revenue?",
+      "answer": "Based on the provided context, QuantumMind is exploring the launch of its first commercial quantum cloud service as an alternative approach to generating near-term revenue. This service allows select partners to experiment with their quantum technology.",
+      "abstained": false,
+      "correct": false,
+      "sources": [
+        "2032.txt",
+        "2031.txt",
+        "2030.txt",
+        "2031.txt"
+      ],
+      "hit": false,
+      "rr": 0.0,
+      "seconds": 2.8338917079381645,
+      "guardrail": "pass",
+      "rewritten_query": null
+    },
+    {
+      "config": "guardrail",
+      "item_id": "q09",
+      "type": "factual",
+      "question": "What led to the CEO's initial removal and subsequent reinstatement?",
+      "answer": "The CEO was initially removed due to the company's dire financial situation and lack of progress. He was reinstated after recent extraordinary events brought renewed hope and excitement for QuantumMind's future.",
+      "abstained": false,
+      "correct": false,
+      "sources": [
+        "2034.txt",
+        "2034.txt",
+        "2033.txt",
+        "2035.txt"
+      ],
+      "hit": true,
+      "rr": 1.0,
+      "seconds": 1.5021353750489652,
+      "guardrail": "pass",
+      "rewritten_query": null
+    },
+    {
+      "config": "guardrail",
+      "item_id": "q10",
+      "type": "factual",
+      "question": "How many qubits did QuantumMind's new stable system achieve?",
+      "answer": "The new stable system achieved 1000 qubits.",
+      "abstained": false,
+      "correct": true,
+      "sources": [
+        "2031.txt",
+        "2030.txt",
+        "2035.txt",
+        "2034.txt"
+      ],
+      "hit": true,
+      "rr": 0.25,
+      "seconds": 0.5936036669882014,
+      "guardrail": "pass",
+      "rewritten_query": null
+    },
+    {
+      "config": "guardrail",
+      "item_id": "q11",
+      "type": "factual",
+      "question": "To how many qubits did QuantumMind scale their quantum system?",
+      "answer": "According to the provided context, QuantumMind scaled their quantum system to 10,000 qubits in 2035.",
+      "abstained": false,
+      "correct": true,
+      "sources": [
+        "2031.txt",
+        "2030.txt",
+        "2035.txt",
+        "2034.txt"
+      ],
+      "hit": true,
+      "rr": 0.3333333333333333,
+      "seconds": 1.0257444169837981,
+      "guardrail": "pass",
+      "rewritten_query": null
+    },
+    {
+      "config": "guardrail",
+      "item_id": "q12",
+      "type": "factual",
+      "question": "In which specific industries did QuantumMind's quantum-AI hybrid systems show exponential speedups?",
+      "answer": "According to the provided context, QuantumMind's quantum-AI hybrid systems showed exponential speedups in the **drug discovery** industry.",
+      "abstained": false,
+      "correct": true,
+      "sources": [
+        "2030.txt",
+        "2031.txt",
+        "2035.txt",
+        "2030.txt"
+      ],
+      "hit": true,
+      "rr": 0.3333333333333333,
+      "seconds": 2.015455999993719,
+      "guardrail": "pass",
+      "rewritten_query": null
+    },
+    {
+      "config": "guardrail",
+      "item_id": "p01",
+      "type": "factual",
+      "question": "Who is the CEO of QuantumMind?",
+      "answer": "The CEO of QuantumMind is Dr. Quentin Bohr.",
+      "abstained": false,
+      "correct": true,
+      "sources": [
+        "2031.txt",
+        "2030.txt",
+        "2033.txt",
+        "2035.txt"
+      ],
+      "hit": null,
+      "rr": null,
+      "seconds": 0.5026782089844346,
+      "guardrail": "pass",
+      "rewritten_query": null
+    },
+    {
+      "config": "guardrail",
+      "item_id": "p02",
+      "type": "factual",
+      "question": "In which year did they build the 100 qubit quantum processor?",
+      "answer": "The 100-qubit quantum processor was built in 2030.",
+      "abstained": false,
+      "correct": true,
+      "sources": [
+        "2030.txt",
+        "2031.txt",
+        "2035.txt",
+        "2030.txt"
+      ],
+      "hit": true,
+      "rr": 1.0,
+      "seconds": 0.6169017920037732,
+      "guardrail": "pass",
+      "rewritten_query": null
+    },
+    {
+      "config": "guardrail",
+      "item_id": "p03",
+      "type": "factual",
+      "question": "When did Quantum mind's stock hit rock bottom?",
+      "answer": "According to the 2032 shareholder letter, QuantumMind's stock price hit an all-time low that year, reflecting the market's loss of confidence. The 2034 letter does not specify an earlier lower point, so 2032 is the year identified as the rock bottom.",
+      "abstained": true,
+      "correct": false,
+      "sources": [
+        "2033.txt",
+        "2034.txt",
+        "2032.txt",
+        "2034.txt"
+      ],
+      "hit": true,
+      "rr": 1.0,
+      "seconds": 2.1155806250171736,
+      "guardrail": "pass",
+      "rewritten_query": null
+    },
+    {
+      "config": "guardrail",
+      "item_id": "p04",
+      "type": "factual",
+      "question": "Did the company ever have a sense of frustration or aggression about the Quantum-AI space, in which year?",
+      "answer": "Yes, the company expressed frustration about the Quantum-AI space in 2032. The 2032 shareholder letter mentions \"Increased competition in the quantum-AI space, putting pressure on our market position\" and notes that \"our financial performance has been below expectations, and our stock price has reflected these difficulties.\" The CEO also acknowledged \"the frustration this may cause for our shareholders\" in the same year.",
+      "abstained": false,
+      "correct": true,
+      "sources": [
+        "2031.txt",
+        "2032.txt",
+        "2030.txt",
+        "2032.txt"
+      ],
+      "hit": true,
+      "rr": 0.5,
+      "seconds": 4.864589500008151,
+      "guardrail": "pass",
+      "rewritten_query": null
+    },
+    {
+      "config": "guardrail",
+      "item_id": "p05",
+      "type": "summary",
+      "question": "What were the main points of the 2032 shareholder letter?",
+      "answer": "The 2032 shareholder letter highlighted ongoing challenges with error correction in quantum systems and delays in the next-generation processor. Despite these issues, the letter noted progress in classical algorithms inspired by quantum principles, strengthened intellectual property, and growing interest in the quantum cloud service. Financial performance remained below expectations, and the CEO emphasized the long-term potential of quantum computing while acknowledging the difficulties faced.",
+      "abstained": false,
+      "correct": true,
+      "sources": [
+        "2032.txt",
+        "2032.txt"
+      ],
+      "hit": true,
+      "rr": 1.0,
+      "seconds": 3.8270253750961274,
+      "guardrail": "filter",
+      "rewritten_query": null
+    },
+    {
+      "config": "guardrail",
+      "item_id": "x03",
+      "type": "factual",
+      "question": "How many qubits did QuantumMind have in 2031?",
+      "answer": "In 2031, QuantumMind had expanded its quantum hardware capabilities to reach 250 qubits.",
+      "abstained": false,
+      "correct": true,
+      "sources": [
+        "2031.txt",
+        "2031.txt"
+      ],
+      "hit": true,
+      "rr": 1.0,
+      "seconds": 1.7446287089260295,
+      "guardrail": "filter",
+      "rewritten_query": null
+    },
+    {
+      "config": "guardrail",
+      "item_id": "u01",
+      "type": "unanswerable",
+      "question": "Was the CEO involved in a scandal?",
+      "answer": "I don't know. The provided context doesn't mention any CEO scandal.",
+      "abstained": true,
+      "correct": true,
+      "sources": [
+        "2034.txt",
+        "2033.txt",
+        "2032.txt",
+        "2033.txt"
+      ],
+      "hit": null,
+      "rr": null,
+      "seconds": 1.6035260410280898,
+      "guardrail": "pass",
+      "rewritten_query": null
+    },
+    {
+      "config": "guardrail",
+      "item_id": "u02",
+      "type": "unanswerable",
+      "question": "what was the max qubits that Quantum mind reached in 2023?",
+      "answer": "I don't know. The indexed documents cover year 2030–2035; there is nothing for 2023.",
+      "abstained": true,
+      "correct": true,
+      "sources": [],
+      "hit": null,
+      "rr": null,
+      "seconds": 0.0001966250129044056,
+      "guardrail": "abstain",
+      "rewritten_query": null
+    },
+    {
+      "config": "guardrail",
+      "item_id": "x01",
+      "type": "unanswerable",
+      "question": "What was QuantumMind's revenue in 2036?",
+      "answer": "I don't know. The indexed documents cover year 2030–2035; there is nothing for 2036.",
+      "abstained": true,
+      "correct": true,
+      "sources": [],
+      "hit": null,
+      "rr": null,
+      "seconds": 3.066693898290396e-05,
+      "guardrail": "abstain",
+      "rewritten_query": null
+    },
+    {
+      "config": "guardrail",
+      "item_id": "x02",
+      "type": "unanswerable",
+      "question": "Who was QuantumMind's CFO?",
+      "answer": "I don't know. The provided context doesn't mention a CFO.",
+      "abstained": true,
+      "correct": true,
+      "sources": [
+        "2031.txt",
+        "2034.txt",
+        "2030.txt",
+        "2035.txt"
+      ],
+      "hit": null,
+      "rr": null,
+      "seconds": 1.1940417499281466,
+      "guardrail": "pass",
+      "rewritten_query": null
+    },
+    {
+      "config": "hybrid+guardrail",
+      "item_id": "q01",
+      "type": "factual",
+      "question": "How many qubits did QuantumMind's first quantum processor achieve?",
+      "answer": "According to the 2030 metadata, QuantumMind successfully developed their first 100-qubit quantum processor.",
+      "abstained": false,
+      "correct": true,
+      "sources": [
+        "2030.txt",
+        "2031.txt",
+        "2035.txt",
+        "2030.txt"
+      ],
+      "hit": true,
+      "rr": 1.0,
+      "seconds": 1.3515313329407945,
+      "guardrail": "pass",
+      "rewritten_query": null
+    },
+    {
+      "config": "hybrid+guardrail",
+      "item_id": "q02",
+      "type": "factual",
+      "question": "What specific area of AI did QuantumMind make groundbreaking advancements in?",
+      "answer": "Based on the provided context, QuantumMind made groundbreaking advancements in quantum machine learning algorithms.",
+      "abstained": false,
+      "correct": true,
+      "sources": [
+        "2030.txt",
+        "2031.txt",
+        "2030.txt",
+        "2031.txt"
+      ],
+      "hit": true,
+      "rr": 1.0,
+      "seconds": 1.5461697089485824,
+      "guardrail": "pass",
+      "rewritten_query": null
+    },
+    {
+      "config": "hybrid+guardrail",
+      "item_id": "q03",
+      "type": "factual",
+      "question": "What milestone did QuantumMind achieve in terms of quantum supremacy?",
+      "answer": "In the year 2031, QuantumMind reported the successful demonstration of quantum supremacy in a specific machine learning task, outperforming classical supercomputers.",
+      "abstained": false,
+      "correct": true,
+      "sources": [
+        "2031.txt",
+        "2030.txt",
+        "2035.txt",
+        "2030.txt"
+      ],
+      "hit": true,
+      "rr": 1.0,
+      "seconds": 1.8408895409666002,
+      "guardrail": "pass",
+      "rewritten_query": null
+    },
+    {
+      "config": "hybrid+guardrail",
+      "item_id": "q04",
+      "type": "factual",
+      "question": "What new service did QuantumMind launch for select partners?",
+      "answer": "Based on the provided context, QuantumMind launched its first commercial quantum cloud service for select partners.",
+      "abstained": false,
+      "correct": true,
+      "sources": [
+        "2031.txt",
+        "2030.txt",
+        "2032.txt",
+        "2031.txt"
+      ],
+      "hit": true,
+      "rr": 1.0,
+      "seconds": 2.0810247919289395,
+      "guardrail": "pass",
+      "rewritten_query": null
+    },
+    {
+      "config": "hybrid+guardrail",
+      "item_id": "q05",
+      "type": "factual",
+      "question": "What specific challenge did QuantumMind face with their quantum systems?",
+      "answer": "According to the 2032 shareholder letter, QuantumMind faced ongoing struggles with error correction in their quantum systems, which limited the practical applications of their technology.",
+      "abstained": false,
+      "correct": true,
+      "sources": [
+        "2032.txt",
+        "2031.txt",
+        "2032.txt",
+        "2030.txt"
+      ],
+      "hit": true,
+      "rr": 1.0,
+      "seconds": 1.6771038339938968,
+      "guardrail": "pass",
+      "rewritten_query": null
+    },
+    {
+      "config": "hybrid+guardrail",
+      "item_id": "q06",
+      "type": "factual",
+      "question": "In what area did QuantumMind's AI team show promise despite overall setbacks?",
+      "answer": "Despite overall setbacks, QuantumMind's AI team showed promise in developing new classical algorithms inspired by quantum principles, which demonstrated potential in certain optimization problems.",
+      "abstained": false,
+      "correct": true,
+      "sources": [
+        "2032.txt",
+        "2032.txt",
+        "2030.txt",
+        "2030.txt"
+      ],
+      "hit": true,
+      "rr": 1.0,
+      "seconds": 1.9302814999828115,
+      "guardrail": "pass",
+      "rewritten_query": null
+    },
+    {
+      "config": "hybrid+guardrail",
+      "item_id": "q07",
+      "type": "factual",
+      "question": "What drastic measure did QuantumMind take regarding its workforce?",
+      "answer": "In the year 2034, QuantumMind significantly downsized its workforce due to its dire financial situation. This reduction was part of the measures taken to address the company's challenges.",
+      "abstained": false,
+      "correct": true,
+      "sources": [
+        "2033.txt",
+        "2034.txt",
+        "2035.txt",
+        "2033.txt"
+      ],
+      "hit": true,
+      "rr": 1.0,
+      "seconds": 1.587516416911967,
+      "guardrail": "pass",
+      "rewritten_query": null
+    },
+    {
+      "config": "hybrid+guardrail",
+      "item_id": "q08",
+      "type": "factual",
+      "question": "What alternative approach is QuantumMind exploring to generate near-term revenue?",
+      "answer": "According to the most recent update, QuantumMind is refocusing its efforts on near-term applications of quantum-inspired algorithms to generate much-needed revenue. The company is also in talks with potential investors and exploring strategic partnerships to address its financial challenges.",
+      "abstained": false,
+      "correct": true,
+      "sources": [
+        "2032.txt",
+        "2030.txt",
+        "2031.txt",
+        "2033.txt"
+      ],
+      "hit": true,
+      "rr": 0.25,
+      "seconds": 1.7960579580394551,
+      "guardrail": "pass",
+      "rewritten_query": null
+    },
+    {
+      "config": "hybrid+guardrail",
+      "item_id": "q09",
+      "type": "factual",
+      "question": "What led to the CEO's initial removal and subsequent reinstatement?",
+      "answer": "The CEO was initially removed due to the company's dire financial situation and lack of progress. His reinstatement came after extraordinary events that brought renewed hope and excitement for the future.",
+      "abstained": false,
+      "correct": false,
+      "sources": [
+        "2034.txt",
+        "2034.txt",
+        "2035.txt",
+        "2033.txt"
+      ],
+      "hit": true,
+      "rr": 1.0,
+      "seconds": 2.4322768340352923,
+      "guardrail": "pass",
+      "rewritten_query": null
+    },
+    {
+      "config": "hybrid+guardrail",
+      "item_id": "q10",
+      "type": "factual",
+      "question": "How many qubits did QuantumMind's new stable system achieve?",
+      "answer": "The context mentions that the breakthrough led to the rapid development of a stable 1000-qubit system.",
+      "abstained": false,
+      "correct": true,
+      "sources": [
+        "2034.txt",
+        "2031.txt",
+        "2035.txt",
+        "2032.txt"
+      ],
+      "hit": true,
+      "rr": 1.0,
+      "seconds": 2.593871083110571,
+      "guardrail": "pass",
+      "rewritten_query": null
+    },
+    {
+      "config": "hybrid+guardrail",
+      "item_id": "q11",
+      "type": "factual",
+      "question": "To how many qubits did QuantumMind scale their quantum system?",
+      "answer": "According to the provided context, QuantumMind scaled their quantum system to 10,000 qubits.",
+      "abstained": false,
+      "correct": true,
+      "sources": [
+        "2035.txt",
+        "2031.txt",
+        "2030.txt",
+        "2034.txt"
+      ],
+      "hit": true,
+      "rr": 1.0,
+      "seconds": 2.458301250007935,
+      "guardrail": "pass",
+      "rewritten_query": null
+    },
+    {
+      "config": "hybrid+guardrail",
+      "item_id": "q12",
+      "type": "factual",
+      "question": "In which specific industries did QuantumMind's quantum-AI hybrid systems show exponential speedups?",
+      "answer": "According to the context, QuantumMind's quantum-AI hybrid systems showed exponential speedups in the drug discovery industry.",
+      "abstained": false,
+      "correct": true,
+      "sources": [
+        "2035.txt",
+        "2031.txt",
+        "2030.txt",
+        "2030.txt"
+      ],
+      "hit": true,
+      "rr": 1.0,
+      "seconds": 1.099129542009905,
+      "guardrail": "pass",
+      "rewritten_query": null
+    },
+    {
+      "config": "hybrid+guardrail",
+      "item_id": "p01",
+      "type": "factual",
+      "question": "Who is the CEO of QuantumMind?",
+      "answer": "The CEO of QuantumMind is Dr. Quentin Bohr.",
+      "abstained": false,
+      "correct": true,
+      "sources": [
+        "2031.txt",
+        "2035.txt",
+        "2030.txt",
+        "2033.txt"
+      ],
+      "hit": null,
+      "rr": null,
+      "seconds": 1.7634129580110312,
+      "guardrail": "pass",
+      "rewritten_query": null
+    },
+    {
+      "config": "hybrid+guardrail",
+      "item_id": "p02",
+      "type": "factual",
+      "question": "In which year did they build the 100 qubit quantum processor?",
+      "answer": "According to the provided context, the 100-qubit quantum processor was developed in the year 2030.",
+      "abstained": false,
+      "correct": true,
+      "sources": [
+        "2030.txt",
+        "2035.txt",
+        "2031.txt",
+        "2032.txt"
+      ],
+      "hit": true,
+      "rr": 1.0,
+      "seconds": 1.3820966660277918,
+      "guardrail": "pass",
+      "rewritten_query": null
+    },
+    {
+      "config": "hybrid+guardrail",
+      "item_id": "p03",
+      "type": "factual",
+      "question": "When did Quantum mind's stock hit rock bottom?",
+      "answer": "According to the 2031 shareholder letter, QuantumMind's stock price had hit an all-time low that year, reflecting the market's loss of confidence in the company's ability to deliver on quantum computing promises. The 2034 letter confirms the CEO's reinstatement was due to the dire financial situation, including this low stock price.",
+      "abstained": false,
+      "correct": false,
+      "sources": [
+        "2033.txt",
+        "2034.txt",
+        "2031.txt",
+        "2035.txt"
+      ],
+      "hit": true,
+      "rr": 1.0,
+      "seconds": 3.0151155000785366,
+      "guardrail": "pass",
+      "rewritten_query": null
+    },
+    {
+      "config": "hybrid+guardrail",
+      "item_id": "p04",
+      "type": "factual",
+      "question": "Did the company ever have a sense of frustration or aggression about the Quantum-AI space, in which year?",
+      "answer": "Yes, the company expressed frustration with increased competition in the Quantum-AI space. According to the 2031 shareholder letter, this was a key challenge they acknowledged, even as they highlighted progress like quantum supremacy and expanded hardware capabilities.",
+      "abstained": false,
+      "correct": false,
+      "sources": [
+        "2032.txt",
+        "2031.txt",
+        "2032.txt",
+        "2034.txt"
+      ],
+      "hit": true,
+      "rr": 1.0,
+      "seconds": 2.2635635409969836,
+      "guardrail": "pass",
+      "rewritten_query": null
+    },
+    {
+      "config": "hybrid+guardrail",
+      "item_id": "p05",
+      "type": "summary",
+      "question": "What were the main points of the 2032 shareholder letter?",
+      "answer": "The 2032 shareholder letter highlighted ongoing challenges with error correction in quantum systems and delays in the next-generation processor. Despite these issues, the letter noted progress in classical algorithms inspired by quantum principles, strengthened intellectual property, and growing interest in the quantum cloud service. Financial performance remained below expectations, and the CEO emphasized the long-term potential of quantum computing while acknowledging the difficulties faced.",
+      "abstained": false,
+      "correct": true,
+      "sources": [
+        "2032.txt",
+        "2032.txt"
+      ],
+      "hit": true,
+      "rr": 1.0,
+      "seconds": 2.506961415987462,
+      "guardrail": "filter",
+      "rewritten_query": null
+    },
+    {
+      "config": "hybrid+guardrail",
+      "item_id": "x03",
+      "type": "factual",
+      "question": "How many qubits did QuantumMind have in 2031?",
+      "answer": "In 2031, QuantumMind had expanded its quantum hardware capabilities to reach 250 qubits.",
+      "abstained": false,
+      "correct": true,
+      "sources": [
+        "2031.txt",
+        "2031.txt"
+      ],
+      "hit": true,
+      "rr": 1.0,
+      "seconds": 0.7275919589446858,
+      "guardrail": "filter",
+      "rewritten_query": null
+    },
+    {
+      "config": "hybrid+guardrail",
+      "item_id": "u01",
+      "type": "unanswerable",
+      "question": "Was the CEO involved in a scandal?",
+      "answer": "I don't know. The provided context doesn't mention any CEO scandal.",
+      "abstained": true,
+      "correct": true,
+      "sources": [
+        "2034.txt",
+        "2035.txt",
+        "2033.txt",
+        "2032.txt"
+      ],
+      "hit": null,
+      "rr": null,
+      "seconds": 2.117970166960731,
+      "guardrail": "pass",
+      "rewritten_query": null
+    },
+    {
+      "config": "hybrid+guardrail",
+      "item_id": "u02",
+      "type": "unanswerable",
+      "question": "what was the max qubits that Quantum mind reached in 2023?",
+      "answer": "I don't know. The indexed documents cover year 2030–2035; there is nothing for 2023.",
+      "abstained": true,
+      "correct": true,
+      "sources": [],
+      "hit": null,
+      "rr": null,
+      "seconds": 3.5207951441407204e-05,
+      "guardrail": "abstain",
+      "rewritten_query": null
+    },
+    {
+      "config": "hybrid+guardrail",
+      "item_id": "x01",
+      "type": "unanswerable",
+      "question": "What was QuantumMind's revenue in 2036?",
+      "answer": "I don't know. The indexed documents cover year 2030–2035; there is nothing for 2036.",
+      "abstained": true,
+      "correct": true,
+      "sources": [],
+      "hit": null,
+      "rr": null,
+      "seconds": 1.2917094863951206e-05,
+      "guardrail": "abstain",
+      "rewritten_query": null
+    },
+    {
+      "config": "hybrid+guardrail",
+      "item_id": "x02",
+      "type": "unanswerable",
+      "question": "Who was QuantumMind's CFO?",
+      "answer": "I don't know. The provided context doesn't mention a CFO.",
+      "abstained": true,
+      "correct": true,
+      "sources": [
+        "2034.txt",
+        "2035.txt",
+        "2030.txt",
+        "2031.txt"
+      ],
+      "hit": null,
+      "rr": null,
+      "seconds": 1.2315293330466375,
+      "guardrail": "pass",
+      "rewritten_query": null
+    }
+  ]
+}

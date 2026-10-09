@@ -1,0 +1,18 @@
+Dear Shareholders,
+
+As we reflect on the past year at QuantumMind, I'm pleased to report that we continue to make steady progress in our mission to revolutionize computing through quantum technology and AI.
+
+Key highlights from this year include:
+
+The successful demonstration of quantum supremacy in a specific machine learning task, outperforming classical supercomputers.
+Expansion of our quantum hardware capabilities, now reaching 250 qubits.
+Launch of our first commercial quantum cloud service, allowing select partners to experiment with our technology.
+While these achievements are promising, we acknowledge that the road to widespread practical applications is longer than initially anticipated. We've encountered challenges in scaling our quantum systems and in bridging the gap between theoretical possibilities and real-world implementations.
+
+Our stock price has experienced some volatility as the market adjusts its expectations for the quantum computing sector. However, we remain confident in our long-term strategy and the transformative potential of our technology.
+
+We appreciate your patience and continued support as we navigate this complex and groundbreaking field. The quantum revolution is still in its early stages, and QuantumMind is at the forefront of this exciting journey.
+
+Thank you for your trust in our vision.
+
+Sincerely, Dr. Quentin Bohr, CEO, QuantumMind

@@ -1,0 +1,45 @@
+# localrag configuration for the bundled demo corpus.
+# Precedence: built-in defaults < this file < RAG_* / OLLAMA_HOST env vars < CLI flags.
+# To point the engine at another domain, copy this file and change [corpus] and [metadata].
+
+[models]
+host = "http://localhost:11434"
+chat = "hf.co/openbmb/MiniCPM5-2B-GGUF:Q4_K_M"
+embedding = "nomic-embed-text"
+temperature = 0.0        # repeatable evaluation; the model card suggests 1.0 for open chat
+reasoning = false        # MiniCPM5 is a thinking model; keep its chain of thought out of answers
+
+[corpus]
+data_dir = "data/quantummind"
+globs = ["**/*.txt", "**/*.md"]
+collection = "quantummind"
+qdrant_path = "./qdrant_db"
+
+[chunking]
+size = 1000
+overlap = 200
+
+[metadata]
+header = []              # fields to write into chunk text before embedding, e.g. ["year"]
+scope_field = "year"     # the guardrail abstains on questions about years outside the corpus
+
+# Metadata lifted from each file's path. The letters are named 2030.txt … 2035.txt.
+[[metadata.fields]]
+name = "year"
+pattern = '(\d{4})'
+type = "int"
+
+[generation]
+context_format = "header"   # plain | header | tagged
+guardrail = true
+rewrite = false
+
+[retrieval]
+strategy = "dense"       # dense | mmr | hybrid
+k = 4
+fetch_k = 20
+lambda_mult = 0.5
+bm25_weight = 0.5
+rrf_c = 60
+rerank = false
+rerank_candidates = 8
